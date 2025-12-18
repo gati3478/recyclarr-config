@@ -47,7 +47,8 @@ Four Radarr profiles targeting different use cases, two Sonarr profiles for TV c
 
 1. Install [Recyclarr](https://recyclarr.dev/)
 2. Update `base_url` and `api_key` for your instances
-3. Run: `recyclarr sync`
+3. Rename the file to `recyclarr.yml`
+4. Run: `recyclarr sync`
 
 ## Why These Choices?
 
