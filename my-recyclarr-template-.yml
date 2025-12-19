@@ -373,11 +373,11 @@ radarr:
           - name: HD-Lite
             score: -500
           - name: HD-Premium
-            score: -2000
+            score: -1000
           - name: UHD-Lite
             score: -500
           - name: UHD-Premium
-            score: -2000
+            score: -1000
 
       - trash_ids:
           - b6832f586342ef70d9c128d40c07b872  # Bad Dual Groups
