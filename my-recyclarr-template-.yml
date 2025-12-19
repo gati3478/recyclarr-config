@@ -421,9 +421,9 @@ radarr:
           - 9170d55c319f4fe40da8711ba9d8050d  # x265
         assign_scores_to:
           - name: UHD-Lite
-            score: 1800
-          - name: UHD-Premium
             score: 1500
+          - name: UHD-Premium
+            score: 800
 
       # HEVC encodes that strip HDR/DV info
       - trash_ids:
@@ -432,7 +432,7 @@ radarr:
           - name: UHD-Lite
             score: -2500
           - name: UHD-Premium
-            score: -5000
+            score: -8000
 
       # Proper 10-bit color depth everywhere (small nudge)
       - trash_ids:
@@ -793,7 +793,7 @@ sonarr:
           - 9b64dff695c2115facf1b6ea59c9bd07  # x265 (no HDR/DV)
         assign_scores_to:
           - name: UHD
-            score: -5000
+            score: -8000
 
       - trash_ids:
           - b2550eb333d27b75833e25b8c2557b38  # 10bit
