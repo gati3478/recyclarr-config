@@ -742,9 +742,9 @@ sonarr:
           - e2315f990da2e2cbfc9fa5b7a6fcfe48  # LQ (Release Title)
         assign_scores_to:
           - name: HD
-            score: -1000
+            score: -1500
           - name: UHD
-            score: -1000
+            score: -2500
 
       - trash_ids:
           - 82d40da2bc6923f41e14394075dd4b03  # No-RlsGroup
