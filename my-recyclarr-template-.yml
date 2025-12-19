@@ -359,13 +359,13 @@ radarr:
           - e204b80c87be9497a8a6eaff48f72905  # LQ (Release Title)
         assign_scores_to:
           - name: HD-Lite
-            score: -1000
+            score: 0
           - name: HD-Premium
-            score: -2500
+            score: -5000
           - name: UHD-Lite
-            score: -1000
+            score: 0
           - name: UHD-Premium
-            score: -2500
+            score: -5000
 
       - trash_ids:
           - ae9b7c9ebde1f3bd336a8cbd1ec4c5e5  # No-RlsGroup
@@ -377,12 +377,23 @@ radarr:
           - name: UHD-Lite
             score: -500
           - name: UHD-Premium
-            score: -1000
+            score: -1500
+
+      - trash_ids:
+          - 5c44f52a8714fdd79bb4d98e2673be1f  # Retags
+        assign_scores_to:
+          - name: HD-Lite
+            score: -10
+          - name: HD-Premium
+            score: -10
+          - name: UHD-Lite
+            score: -10
+          - name: UHD-Premium
+            score: -10
 
       - trash_ids:
           - b6832f586342ef70d9c128d40c07b872  # Bad Dual Groups
           - 7357cf5161efbf8c4d5d0c30b4815ee2  # Obfuscated
-          - 5c44f52a8714fdd79bb4d98e2673be1f  # Retags
           - 0a3f082873eb454bde444150b70253cc  # Extras
         assign_scores_to:
           - name: HD-Lite
@@ -423,16 +434,16 @@ radarr:
           - name: UHD-Lite
             score: 1500
           - name: UHD-Premium
-            score: 800
+            score: 500
 
       # HEVC encodes that strip HDR/DV info
       - trash_ids:
           - 839bea857ed2c0a8e084f3cbdbd65ecb  # x265 (no HDR/DV)
         assign_scores_to:
           - name: UHD-Lite
-            score: -2500
+            score: -2000
           - name: UHD-Premium
-            score: -8000
+            score: -6000
 
       # Proper 10-bit color depth everywhere (small nudge)
       - trash_ids:
@@ -742,22 +753,29 @@ sonarr:
           - e2315f990da2e2cbfc9fa5b7a6fcfe48  # LQ (Release Title)
         assign_scores_to:
           - name: HD
-            score: -2500
+            score: -5000
           - name: UHD
-            score: -2500
+            score: -5000
 
       - trash_ids:
           - 82d40da2bc6923f41e14394075dd4b03  # No-RlsGroup
         assign_scores_to:
           - name: HD
-            score: -1500
+            score: -1000
           - name: UHD
             score: -1500
 
       - trash_ids:
+          - 06d66ab109d4d2eddb2794d21526d140  # Retags
+        assign_scores_to:
+          - name: HD
+            score: -10
+          - name: UHD
+            score: -10
+
+      - trash_ids:
           - 32b367365729d530ca1c124a0b180c64  # Bad Dual Groups
           - e1a997ddb54e3ecbfe06341ad323c458  # Obfuscated
-          - 06d66ab109d4d2eddb2794d21526d140  # Retags
           - fbcb31d8dabd2a319072b84fc0b7249c  # Extras
         assign_scores_to:
           - name: HD
@@ -781,7 +799,7 @@ sonarr:
           - 47435ece6b99a0b477caf360e79ba0bb  # x265 (HD)
         assign_scores_to:
           - name: HD
-            score: 0
+            score: -10
 
       - trash_ids:
           - c9eafd50846d299b862ca9bb6ea91950  # x265 (UHD)
@@ -793,7 +811,7 @@ sonarr:
           - 9b64dff695c2115facf1b6ea59c9bd07  # x265 (no HDR/DV)
         assign_scores_to:
           - name: UHD
-            score: -8000
+            score: -6000
 
       - trash_ids:
           - b2550eb333d27b75833e25b8c2557b38  # 10bit
