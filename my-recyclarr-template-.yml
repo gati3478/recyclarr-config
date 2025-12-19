@@ -361,7 +361,7 @@ radarr:
           - name: HD-Lite
             score: -1000
           - name: HD-Premium
-            score: -1500
+            score: -2500
           - name: UHD-Lite
             score: -1000
           - name: UHD-Premium
@@ -742,7 +742,7 @@ sonarr:
           - e2315f990da2e2cbfc9fa5b7a6fcfe48  # LQ (Release Title)
         assign_scores_to:
           - name: HD
-            score: -1500
+            score: -2500
           - name: UHD
             score: -2500
 
