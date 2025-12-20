@@ -7,37 +7,11 @@ radarr:
     include:
       - template: radarr-quality-definition-movie
 
+      # ============================================================
+      # Option 1: HD-Kino — 1080p cap, premium groups & audio (6–16 GB)
+      # ============================================================
     quality_profiles:
-      # ============================================================
-      # Option 1: HD-Lite — 1080p cap, efficient encodes (aim ~3–4 GB)
-      # ============================================================
-      - name: HD-Lite
-        score_set: sqp-1-web-1080p   # web-leaning 1080p base; we add overrides below
-        reset_unmatched_scores:
-          enabled: true
-        upgrade:
-          allowed: true
-          until_quality: Bluray-1080p
-          until_score: 10000
-        min_format_score: 0
-        quality_sort: top
-        qualities:
-          - name: Bluray-1080p
-          - name: WEB 1080p
-            qualities: [WEBDL-1080p, WEBRip-1080p]
-          - name: Bluray-720p
-          - name: WEB 720p
-            qualities: [WEBDL-720p, WEBRip-720p]
-          - name: HDTV-1080p
-          - name: HDTV-720p
-          - name: Bluray-480p
-          - name: WEB 480p
-            qualities: [WEBDL-480p, WEBRip-480p]
-
-      # ============================================================
-      # Option 2: HD-Premium — 1080p cap, premium groups & audio (6–16 GB)
-      # ============================================================
-      - name: HD-Premium
+      - name: HD-Kino
         score_set: sqp-1-1080p       # mixed 1080p base; we push top WEB/BD groups & lossless audio
         reset_unmatched_scores:
           enabled: true
@@ -61,34 +35,9 @@ radarr:
             qualities: [WEBDL-480p, WEBRip-480p]
 
       # ============================================================
-      # Option 3: UHD-Lite — up to 2160p, efficient (aim ~7–9 GB; 1080p fallback)
+      # Option 2: UHD-Kino — up to 2160p, premium (20–35 GB, IMAX ok)
       # ============================================================
-      - name: UHD-Lite
-        score_set: sqp-1-web-2160p   # web-leaning 2160p base; we keep DV/HDR boosts, efficient codecs
-        reset_unmatched_scores:
-          enabled: true
-        upgrade:
-          allowed: true
-          until_quality: Bluray-2160p
-          until_score: 10000
-        min_format_score: 0
-        quality_sort: top
-        qualities:
-          - name: Bluray-2160p
-          - name: WEB 2160p
-            qualities: [WEBDL-2160p, WEBRip-2160p]
-          - name: HDTV-2160p
-          - name: Bluray-1080p
-          - name: WEB 1080p
-            qualities: [WEBDL-1080p, WEBRip-1080p]
-          - name: Bluray-720p
-          - name: WEB 720p
-            qualities: [WEBDL-720p, WEBRip-720p]
-
-      # ============================================================
-      # Option 4: UHD-Premium — up to 2160p, premium (20–35 GB, IMAX ok)
-      # ============================================================
-      - name: UHD-Premium
+      - name: UHD-Kino
         score_set: sqp-1-2160p       # mixed 2160p base; prefer UHD BD/Web top tiers & lossless audio
         reset_unmatched_scores:
           enabled: true
@@ -123,13 +72,9 @@ radarr:
           - dcf3ec6938fa32445f590a4da84256cd  # DTS-HD MA
           - f9f847ac70a0af62ea4a08280b859636  # DTS-ES
         assign_scores_to:
-          - name: HD-Lite
+          - name: HD-Kino
             score: -10000
-          - name: HD-Premium
-            score: -10000
-          - name: UHD-Lite
-            score: -10000
-          - name: UHD-Premium
+          - name: UHD-Kino
             score: -10000
 
       # Lossless (mostly Premium)
@@ -137,89 +82,53 @@ radarr:
       - trash_ids:
           - 1af239278386be2919e1bcee0bde047e  # DD+ ATMOS
         assign_scores_to:
-          - name: HD-Lite
-            score: 1200
-          - name: HD-Premium
-            score: 2400
-          - name: UHD-Lite
-            score: 1200
-          - name: UHD-Premium
-            score: 2400
+          - name: HD-Kino
+            score: 1350
+          - name: UHD-Kino
+            score: 1350
 
       - trash_ids:
           - 417804f7f2c4308c1f4c5d380d4c4475  # ATMOS (undefined)
-        assign_scores_to:
-          - name: HD-Lite
-            score: 1100
-          - name: HD-Premium
-            score: 2200
-          - name: UHD-Lite
-            score: 1100
-          - name: UHD-Premium
-            score: 2200
-
-      - trash_ids:
           - 185f1dd7264c4562b9022d963ac37424  # DD+
         assign_scores_to:
-          - name: HD-Lite
-            score: 900
-          - name: HD-Premium
-            score: 1800
-          - name: UHD-Lite
-            score: 900
-          - name: UHD-Premium
-            score: 1800
+          - name: HD-Kino
+            score: 1250
+          - name: UHD-Kino
+            score: 1250
 
       - trash_ids:
           - 496f355514737f7d83bf7aa4d24f8169  # TrueHD ATMOS
         assign_scores_to:
-          - name: HD-Lite
-            score: -200
-          - name: HD-Premium
-            score: 1500
-          - name: UHD-Lite
-            score: -200
-          - name: UHD-Premium
-            score: 1500
+          - name: HD-Kino
+            score: 750
+          - name: UHD-Kino
+            score: 750
 
       - trash_ids:
           - 3cafb66171b47f226146a0770576870f  # TrueHD
         assign_scores_to:
-          - name: HD-Lite
-            score: -200
-          - name: HD-Premium
-            score: 900
-          - name: UHD-Lite
-            score: -200
-          - name: UHD-Premium
-            score: 900
+          - name: HD-Kino
+            score: 650
+          - name: UHD-Kino
+            score: 650
 
       - trash_ids:
           - e7c2fcae07cbada050a0af3357491d7b  # PCM
           - a570d4a0e56a2874b64e5bfa55202a1b  # FLAC
         assign_scores_to:
-          - name: HD-Lite
-            score: -100
-          - name: HD-Premium
-            score: 1000
-          - name: UHD-Lite
-            score: -100
-          - name: UHD-Premium
-            score: 1000
+          - name: HD-Kino
+            score: 500
+          - name: UHD-Kino
+            score: 500
 
-      # Basic/neutral audio (a nudge so Compact doesn’t avoid them)
       - trash_ids:
           - 240770601cc226190c367ef59aba7463 # AAC
           - c2998bd0d90ed5621d8df281e839436e # DD
         assign_scores_to:
-          - name: HD-Lite
-            score: 600
-          - name: HD-Premium
-            score: 800
-          - name: UHD-Lite
-            score: 600
-          - name: UHD-Premium
-            score: 800
+          - name: HD-Kino
+            score: 450
+          - name: UHD-Kino
+            score: 450
 
       # ============================================================
       # HDR/Dolby Vision (UHD focus)
@@ -228,35 +137,21 @@ radarr:
       - trash_ids:
           - 923b6abef9b17f937fab56cfcf89e1f1  # DV (w/o HDR fallback)
         assign_scores_to:
-          - name: UHD-Lite
-            score: -10000
-          - name: UHD-Premium
+          - name: UHD-Kino
             score: -10000
 
       # Boost good HDR stacks
       - trash_ids:
           - b337d6812e06c200ec9a2d3cfa9d20a7  # DV Boost
         assign_scores_to:
-          - name: UHD-Lite
-            score: 800
-          - name: UHD-Premium
+          - name: UHD-Kino
             score: 1000
 
       - trash_ids:
           - caa37d0df9c348912df1fb1d88f9273a  # HDR10+ Boost
         assign_scores_to:
-          - name: UHD-Lite
-            score: 50
-          - name: UHD-Premium
+          - name: UHD-Kino
             score: 100
-
-      - trash_ids:
-          - 493b6d1dbec3c3364c59d7607f7e3405  # HDR (generic)
-        assign_scores_to:
-          - name: UHD-Lite
-            score: 200
-          - name: UHD-Premium
-            score: 400
 
       # ============================================================
       # MOVIE VERSIONS (IMAX etc.)
@@ -264,77 +159,60 @@ radarr:
       - trash_ids:
           - 0f12c086e289cf966fa5948eac571f44  # Hybrid
         assign_scores_to:
-          - name: HD-Lite
+          - name: HD-Kino
             score: 100
-          - name: HD-Premium
-            score: 100
-          - name: UHD-Lite
-            score: 900
-          - name: UHD-Premium
-            score: 900
+          - name: UHD-Kino
+            score: 500
 
       - trash_ids:
           - eecf3a857724171f968a66cb5719e152  # IMAX
           - 9f6cbff8cfe4ebbc1bde14c7b7bec0de  # IMAX Enhanced
         assign_scores_to:
-          - name: HD-Lite
-            score: 200
-          - name: HD-Premium
+          - name: HD-Kino
             score: 800
-          - name: UHD-Lite
-            score: 200
-          - name: UHD-Premium
+          - name: UHD-Kino
             score: 800
 
       - trash_ids:
-          - e0c07d59beb37348e975a930d5e50319  # Criterion Collection
           - 09d9dd29a0fc958f9796e65c2a8864b4  # Open Matte
         assign_scores_to:
-          - name: HD-Lite
+          - name: HD-Kino
+            score: 350
+          - name: UHD-Kino
+            score: 350
+
+      - trash_ids:
+          - e0c07d59beb37348e975a930d5e50319  # Criterion Collection
+          - 957d0f44b592285f26449575e8b1167e  # Special Edition
+        assign_scores_to:
+          - name: HD-Kino
             score: 150
-          - name: HD-Premium
-            score: 150
-          - name: UHD-Lite
-            score: 150
-          - name: UHD-Premium
+          - name: UHD-Kino
             score: 150
 
       - trash_ids:
           - eca37840c13c6ef2dd0262b141a5482f  # 4K Remaster
         assign_scores_to:
-          - name: HD-Lite
+          - name: HD-Kino
             score: 25
-          - name: HD-Premium
-            score: 25
-          - name: UHD-Lite
-            score: 125
-          - name: UHD-Premium
+          - name: UHD-Kino
             score: 125
 
       - trash_ids:
           - 570bc9ebecd92723d2d21500f4be314c  # Remaster
-          - 957d0f44b592285f26449575e8b1167e  # Special Edition
         assign_scores_to:
-          - name: HD-Lite
-            score: 125
-          - name: HD-Premium
-            score: 125
-          - name: UHD-Lite
+          - name: HD-Kino
             score: 100
-          - name: UHD-Premium
-            score: 100
+          - name: UHD-Kino
+            score: 50
 
       - trash_ids:
           - e9001909a4c88013a359d0b9920d7bea  # Theatrical Cut
         assign_scores_to:
-          - name: HD-Lite
-            score: -10
-          - name: HD-Premium
-            score: -10
-          - name: UHD-Lite
-            score: -10
-          - name: UHD-Premium
-            score: -10
+          - name: HD-Kino
+            score: -50
+          - name: UHD-Kino
+            score: -50
 
       # ============================================================
       # UNIVERSAL BLOCKS (applied to ALL profiles)
@@ -345,50 +223,34 @@ radarr:
           - 8baaf0b3142bf4d94c42a724f034e27a  # Remux Tier 03
           - ed38b889b31be83fda192888e2286d83  # BR-DISK
         assign_scores_to:
-          - name: HD-Lite
+          - name: HD-Kino
             score: -10000
-          - name: HD-Premium
-            score: -10000
-          - name: UHD-Lite
-            score: -10000
-          - name: UHD-Premium
+          - name: UHD-Kino
             score: -10000
 
       - trash_ids:
           - 90a6f9a284dff5103f6346090e6280c8  # LQ
-          - e204b80c87be9497a8a6eaff48f72905  # LQ (Release Title)
         assign_scores_to:
-          - name: HD-Lite
-            score: 0
-          - name: HD-Premium
-            score: -5000
-          - name: UHD-Lite
-            score: 0
-          - name: UHD-Premium
-            score: -5000
+          - name: HD-Kino
+            score: -2500
+          - name: UHD-Kino
+            score: -4500
 
       - trash_ids:
+          - e204b80c87be9497a8a6eaff48f72905  # LQ (Release Title)
           - ae9b7c9ebde1f3bd336a8cbd1ec4c5e5  # No-RlsGroup
         assign_scores_to:
-          - name: HD-Lite
-            score: -500
-          - name: HD-Premium
+          - name: HD-Kino
             score: -1000
-          - name: UHD-Lite
-            score: -500
-          - name: UHD-Premium
-            score: -1500
+          - name: UHD-Kino
+            score: -1000
 
       - trash_ids:
           - 5c44f52a8714fdd79bb4d98e2673be1f  # Retags
         assign_scores_to:
-          - name: HD-Lite
+          - name: HD-Kino
             score: -10
-          - name: HD-Premium
-            score: -10
-          - name: UHD-Lite
-            score: -10
-          - name: UHD-Premium
+          - name: UHD-Kino
             score: -10
 
       - trash_ids:
@@ -396,170 +258,45 @@ radarr:
           - 7357cf5161efbf8c4d5d0c30b4815ee2  # Obfuscated
           - 0a3f082873eb454bde444150b70253cc  # Extras
         assign_scores_to:
-          - name: HD-Lite
-            score: -2000
-          - name: HD-Premium
+          - name: HD-Kino
             score: -2500
-          - name: UHD-Lite
+          - name: UHD-Kino
             score: -2500
-          - name: UHD-Premium
-            score: -3000
 
       # Prefer P2P by lightly penalizing Scene
       - trash_ids:
           - f537cf427b64c38c8e36298f657e4828  # Scene
         assign_scores_to:
-          - name: HD-Lite
+          - name: HD-Kino
             score: -50
-          - name: HD-Premium
-            score: -50
-          - name: UHD-Lite
-            score: -50
-          - name: UHD-Premium
+          - name: UHD-Kino
             score: -50
 
       # ============================================================
       # CODEC & DEPTH (Compact = efficiency; Premium = neutrality)
       # ============================================================
-      # HEVC for compact profiles
-      - trash_ids:
-          - dc98083864ea246d05a42df0d05f81cc  # x265 (HD)
-        assign_scores_to:
-          - name: HD-Lite
-            score: 2000
 
       - trash_ids:
           - 9170d55c319f4fe40da8711ba9d8050d  # x265
         assign_scores_to:
-          - name: UHD-Lite
-            score: 1500
-          - name: UHD-Premium
-            score: 500
+          - name: UHD-Kino
+            score: 100
 
       # HEVC encodes that strip HDR/DV info
       - trash_ids:
           - 839bea857ed2c0a8e084f3cbdbd65ecb  # x265 (no HDR/DV)
         assign_scores_to:
-          - name: UHD-Lite
-            score: -2000
-          - name: UHD-Premium
-            score: -6000
+          - name: HD-Kino
+            score: -1000
 
       # Proper 10-bit color depth everywhere (small nudge)
       - trash_ids:
           - a5d148168c4506b55cf53984107c396e  # 10bit
         assign_scores_to:
-          - name: HD-Lite
+          - name: HD-Kino
             score: 10
-          - name: HD-Premium
+          - name: UHD-Kino
             score: 10
-          - name: UHD-Lite
-            score: 10
-          - name: UHD-Premium
-            score: 10
-
-      # ============================================================
-      # RELEASE GROUP TIERS (Premium chases top encoders)
-      # ============================================================
-      # WEB TIERS
-      # HD-Lite: Flatten scoring, slight preference for efficient mid-tier groups
-      # HD-Premium: Strong preference for top-tier quality
-      # UHD-Lite: Favor mid-tier, they often compress better
-      # UHD-Premium: Chase the best
-      - trash_ids:
-          - c20f169ef63c5f40c2def54abaf4438e  # WEB Tier 01
-        assign_scores_to:
-          - name: HD-Lite
-            score: 400        # Good but not chasing large encodes
-          - name: HD-Premium
-            score: 1300       # Want the best
-          - name: UHD-Lite
-            score: 500        # Decent but can be bloated
-          - name: UHD-Premium
-            score: 1500       # Want the best
-      - trash_ids:
-          - 403816d65392c79236dcb6dd591aeda4  # WEB Tier 02
-        assign_scores_to:
-          - name: HD-Lite
-            score: 450        # Sweet spot for efficiency
-          - name: HD-Premium
-            score: 1050
-          - name: UHD-Lite
-            score: 600        # Often better size/quality ratio
-          - name: UHD-Premium
-            score: 1250
-      - trash_ids:
-          - af94e0fe497124d1f9ce732069ec8c3b  # WEB Tier 03
-        assign_scores_to:
-          - name: HD-Lite
-            score: 350        # Still acceptable
-          - name: HD-Premium
-            score: 800
-          - name: UHD-Lite
-            score: 550        # Decent compression
-          - name: UHD-Premium
-            score: 1000
-
-      # Top-tier HD Bluray encoders
-      - trash_ids:
-          - ed27ebfef2f323e964fb1f61391bcb35  # HD Bluray Tier 01
-        assign_scores_to:
-          - name: HD-Lite
-            score: 300        # Quality is great but files are large
-          - name: HD-Premium
-            score: 1400       # Exactly what we want
-          - name: UHD-Lite
-            score: 200        # Fallback, prefer UHD sources
-          - name: UHD-Premium
-            score: 1000       # Good fallback
-      - trash_ids:
-          - c20c8647f2746a1f4c4262b0fbbeeeae  # HD Bluray Tier 02
-        assign_scores_to:
-          - name: HD-Lite
-            score: 350        # Better size balance than Tier 01
-          - name: HD-Premium
-            score: 1100
-          - name: UHD-Lite
-            score: 250
-          - name: UHD-Premium
-            score: 850
-      - trash_ids:
-          - 5608c71bcebba0a5e666223bae8c9227  # HD Bluray Tier 03
-        assign_scores_to:
-          - name: HD-Lite
-            score: 300        # Often more compressed
-          - name: HD-Premium
-            score: 850
-          - name: UHD-Lite
-            score: 200
-          - name: UHD-Premium
-            score: 700
-
-      # UHD BLURAY TIERS
-      # Top-tier UHD groups produce massive files (15-40GB range)
-      # Lite: actively deprioritize Tier 01, prefer more compressed tiers
-      # Premium: these are exactly what we want
-      - trash_ids:
-          - 4d74ac4c4db0b64bff6ce0cffef99bf0  # UHD Bluray Tier 01
-        assign_scores_to:
-          - name: UHD-Lite
-            score: 400        # Quality is insane but files are huge
-          - name: UHD-Premium
-            score: 1800       # This is the goal
-      - trash_ids:
-          - a58f517a70193f8e578056642178419d  # UHD Bluray Tier 02
-        assign_scores_to:
-          - name: UHD-Lite
-            score: 500        # Better balance
-          - name: UHD-Premium
-            score: 1550
-      - trash_ids:
-          - e71939fae578037e7aed3ee219bbe7c1  # UHD Bluray Tier 03
-        assign_scores_to:
-          - name: UHD-Lite
-            score: 600        # Most compressed of the UHD BD tiers
-          - name: UHD-Premium
-            score: 1300
 
 sonarr:
   whatbox-sonarr:
@@ -645,45 +382,37 @@ sonarr:
           - 4232a509ce60c4e208d13825b7c06264  # DD+ ATMOS
         assign_scores_to:
           - name: HD
-            score: 2400
+            score: 1350
           - name: UHD
-            score: 2400
+            score: 1350
 
       # ATMOS (undefined)
       - trash_ids:
           - b6fbafa7942952a13e17e2b1152b539a  # ATMOS (undefined)
-        assign_scores_to:
-          - name: HD
-            score: 2200
-          - name: UHD
-            score: 2200
-
-      # DD+
-      - trash_ids:
           - 63487786a8b01b7f20dd2bc90dd4a477  # DD+
         assign_scores_to:
           - name: HD
-            score: 1800
+            score: 1250
           - name: UHD
-            score: 1800
+            score: 1250
 
       # TrueHD ATMOS
       - trash_ids:
           - 0d7824bb924701997f874e7ff7d4844a  # TrueHD ATMOS
         assign_scores_to:
           - name: HD
-            score: 1500
+            score: 750
           - name: UHD
-            score: 1500
+            score: 750
 
       # TrueHD
       - trash_ids:
           - 1808e4b9cee74e064dfae3f1db99dbfe  # TrueHD
         assign_scores_to:
           - name: HD
-            score: 900
+            score: 650
           - name: UHD
-            score: 900
+            score: 650
 
       # PCM / FLAC
       - trash_ids:
@@ -691,9 +420,9 @@ sonarr:
           - 851bd64e04c9374c51102be3dd9ae4cc  # FLAC
         assign_scores_to:
           - name: HD
-            score: 800
+            score: 500
           - name: UHD
-            score: 800
+            score: 500
 
       # Basic audio
       - trash_ids:
@@ -701,9 +430,9 @@ sonarr:
           - dbe00161b08a25ac6154c55f95e6318d  # DD
         assign_scores_to:
           - name: HD
-            score: 1000
+            score: 450
           - name: UHD
-            score: 1000
+            score: 450
 
       # ============================================================
       # HDR/Dolby Vision (UHD only)
@@ -729,13 +458,6 @@ sonarr:
           - name: UHD
             score: 100
 
-      # HDR (generic)
-      - trash_ids:
-          - 505d871304820ba7106b693be6fe4a9e  # HDR
-        assign_scores_to:
-          - name: UHD
-            score: 300
-
       # ============================================================
       # Block Remux and BR-DISK
       - trash_ids:
@@ -750,20 +472,20 @@ sonarr:
 
       - trash_ids:
           - 9c11cd3f07101cdba90a2d81cf0e56b4  # LQ
-          - e2315f990da2e2cbfc9fa5b7a6fcfe48  # LQ (Release Title)
         assign_scores_to:
           - name: HD
-            score: -5000
+            score: -2500
           - name: UHD
-            score: -5000
+            score: -4500
 
       - trash_ids:
+          - e2315f990da2e2cbfc9fa5b7a6fcfe48  # LQ (Release Title)
           - 82d40da2bc6923f41e14394075dd4b03  # No-RlsGroup
         assign_scores_to:
           - name: HD
             score: -1000
           - name: UHD
-            score: -1500
+            score: -1000
 
       - trash_ids:
           - 06d66ab109d4d2eddb2794d21526d140  # Retags
@@ -799,19 +521,19 @@ sonarr:
           - 47435ece6b99a0b477caf360e79ba0bb  # x265 (HD)
         assign_scores_to:
           - name: HD
-            score: -10
+            score: 0
 
       - trash_ids:
           - c9eafd50846d299b862ca9bb6ea91950  # x265 (UHD)
         assign_scores_to:
           - name: UHD
-            score: 1500
+            score: 100
 
       - trash_ids:
           - 9b64dff695c2115facf1b6ea59c9bd07  # x265 (no HDR/DV)
         assign_scores_to:
-          - name: UHD
-            score: -6000
+          - name: HD
+            score: -5000
 
       - trash_ids:
           - b2550eb333d27b75833e25b8c2557b38  # 10bit
@@ -826,62 +548,5 @@ sonarr:
         assign_scores_to:
           - name: HD
             score: 100
-          - name: UHD
-            score: 900
-
-      # ============================================================
-      # RELEASE GROUP TIERS
-      # ============================================================
-      # WEB Tier 01
-      - trash_ids:
-          - e6258996055b9fbab7e9cb2f75819294  # WEB Tier 01
-        assign_scores_to:
-          - name: HD
-            score: 1300
-          - name: UHD
-            score: 1500
-
-      # WEB Tier 02
-      - trash_ids:
-          - 58790d4e2fdcd9733aa7ae68ba2bb503  # WEB Tier 02
-        assign_scores_to:
-          - name: HD
-            score: 1050
-          - name: UHD
-            score: 1250
-
-      # WEB Tier 03
-      - trash_ids:
-          - d84935abd3f8556dcd51d4f27e22d0a6  # WEB Tier 03
-        assign_scores_to:
-          - name: HD
-            score: 800
-          - name: UHD
-            score: 1000
-
-      # HD Bluray Tier 01
-      - trash_ids:
-          - d6819cba26b1a6508138d25fb5e32293  # HD Bluray Tier 01
-        assign_scores_to:
-          - name: HD
-            score: 1100
-          - name: UHD
-            score: 1200
-
-      # HD Bluray Tier 02
-      - trash_ids:
-          - c2216b7b8aa545dc1ce8388c618f8d57  # HD Bluray Tier 02
-        assign_scores_to:
-          - name: HD
-            score: 850
-          - name: UHD
-            score: 1000
-
-      # WEB Scene — better than unknown, worse than P2P tiers
-      - trash_ids:
-          - d0c516558625b04b363fa6c5c2c7cfd4  # WEB Scene
-        assign_scores_to:
-          - name: HD
-            score: 400
           - name: UHD
             score: 500
