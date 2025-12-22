@@ -1,7 +1,7 @@
 radarr:
   whatbox-radarr:
-    base_url: http://localhost:PORT
-    api_key: API_KEY
+    base_url: http://localhost:RADARR_PORT
+    api_key: RADARR_API_KEY
 
     # Pull TRaSH quality-definition (global min/max sizes per quality).
     include:
@@ -290,8 +290,8 @@ radarr:
 
 sonarr:
   whatbox-sonarr:
-    base_url: http://localhost:PORT
-    api_key: API_KEY
+    base_url: http://localhost:SONARR_PORT
+    api_key: SONARR_API_KEY
 
     # Pull TRaSH quality-definition (global min/max sizes per quality).
     include:
@@ -462,7 +462,7 @@ sonarr:
           - 82d40da2bc6923f41e14394075dd4b03  # No-RlsGroup
         assign_scores_to:
           - name: HD
-            score: -1000
+            score: -800
           - name: UHD
             score: -1000
 
@@ -512,7 +512,7 @@ sonarr:
           - 9b64dff695c2115facf1b6ea59c9bd07  # x265 (no HDR/DV)
         assign_scores_to:
           - name: HD
-            score: -5000
+            score: -1000
 
       - trash_ids:
           - b2550eb333d27b75833e25b8c2557b38  # 10bit
