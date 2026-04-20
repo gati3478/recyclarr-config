@@ -305,7 +305,7 @@ radarr:
       # REPACK / PROPER (tiebreakers when a corrected release exists)
       # ============================================================
       - trash_ids:
-          - f7f7610c6198b67d334f4ce362fafac3 # Repack/Proper
+          - e7718d7a3ce595f289bfee26adc178f5 # Repack/Proper
         assign_scores_to:
           - name: HD-Kino
             score: 5
@@ -313,7 +313,7 @@ radarr:
             score: 5
 
       - trash_ids:
-          - ae29e289193193ecb87cd11ce6e42f18 # Repack2
+          - ae43b294509409a6a13919dedd4764c4 # Repack2
         assign_scores_to:
           - name: HD-Kino
             score: 6
@@ -321,7 +321,7 @@ radarr:
             score: 6
 
       - trash_ids:
-          - 5f93d915b0509e736e5e1f9f9e708e81 # Repack3
+          - 5caaaa1c08c1742aa4342d8c4cc463f2 # Repack3
         assign_scores_to:
           - name: HD-Kino
             score: 7
