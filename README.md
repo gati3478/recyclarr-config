@@ -11,34 +11,34 @@ Optimized Recyclarr config for a Direct Play-only Plex setup with specific hardw
 
 ## Configuration Philosophy
 
-Four Radarr profiles targeting different use cases, two Sonarr profiles for TV content. All profiles respect hardware limitations while maximizing quality within constraints.
+One profile per resolution on each side — two Radarr profiles for movies, two Sonarr profiles for TV. All profiles respect hardware limitations while maximizing quality within constraints.
 
 ### Radarr Profiles
 
-- **HD-Lite** (~2GB): Efficient 1080p encodes, x265 preferred, for casual viewing
-- **HD-Premium** (~6GB): High-quality 1080p from top-tier release groups
-- **UHD-Lite** (~9GB): Efficient 4K with HDR/DV support, compressed but clean
-- **UHD-Premium** (~25GB): Premium 4K encodes from top release groups
+- **HD-Kino** (`sqp-1-1080p` base, ~6–16 GB): 1080p cap, premium WEB/BD groups and lossless audio
+- **UHD-Kino** (`sqp-1-2160p` base, ~20–35 GB): up to 2160p, UHD BD/WEB top tiers, IMAX ok
 
 ### Sonarr Profiles
 
-- **HD**: Balanced 1080p for TV series
-- **UHD**: 4K HDR/DV for prestige TV
+- **HD**: 1080p cap for TV series
+- **UHD**: up to 2160p HDR/DV for prestige TV
 
 ## Key Design Decisions
 
 **Audio Handling**
+
 - DTS formats blocked completely (hard -10000) - Beam 2 can't decode, Plex can't be allowed to transcode audio
 - TrueHD scored positively despite incompatibility - releases always include AC3/DD fallback tracks anyway
 - DD+ Atmos prioritized heavily - native Beam 2 support, excellent quality
 
 **Video Optimization**
-- HDR10+ mostly ignored (C1 doesn't support it natively)
-- Dolby Vision preferred with HDR10 fallback required
-- x265 heavily favored in "Lite" profiles for size efficiency
-- Release group scoring inverted for Lite profiles - mid-tier groups often compress better than top-tier
+
+- HDR10+ mostly ignored (C1 doesn't support it natively; scored only as a tiebreaker)
+- Dolby Vision preferred with HDR10 fallback required; DV-only blocked hard
+- x265 penalized on 1080p releases without HDR (encoder-noise territory), lightly favored on UHD where it pairs with HDR
 
 **Universal Blocks**
+
 - Remux/BR-DISK blocked (too large, Direct Play requirement makes them pointless)
 - Scene releases slightly penalized (prefer P2P quality)
 - Low-quality, obfuscated, and re-tagged releases heavily penalized
@@ -52,4 +52,4 @@ Four Radarr profiles targeting different use cases, two Sonarr profiles for TV c
 
 ## Why These Choices?
 
-The scoring is opinionated toward a Direct Play workflow where file size matters but quality can't be sacrificed. "Lite" profiles chase compression without accepting garbage encodes. "Premium" profiles pursue top-tier releases but stay within reasonable size bounds (no 60GB remuxes). Everything respects the hard constraint: if Plex can't Direct Play it, it won't play at all.
+The scoring is opinionated toward a Direct Play workflow where file size matters but quality can't be sacrificed. One profile per resolution pursues the best release that still fits the size envelope (~6–16 GB at 1080p, ~20–35 GB at 2160p) — no 60 GB remuxes, no garbage compressions. Everything respects the hard constraint: if Plex can't Direct Play it, it won't play at all.
