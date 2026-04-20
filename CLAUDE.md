@@ -61,14 +61,19 @@ All profiles use `reset_unmatched_scores: true` so TRaSH base scores not explici
 - `-10000` = hard block (DTS, Remux, BR-DISK, DV without fallback)
 - `-2500` to `-4500` = strong penalty (LQ, Bad Dual Groups, Obfuscated)
 - `-50` to `-1000` = soft penalty (Scene, Retags, No-RlsGroup, x265 without HDR)
-- `+10` to `+100` = light preference (10bit, x265 in UHD, HDR10+)
+- `+5` to `+7` = tiebreakers (Repack/Proper, Repack2, Repack3 — grab the corrected release when otherwise equal)
+- `+10` to `+100` = light preference (10bit, x265 in UHD, HDR10+, generic HDR +50)
 - `+450` to `+1350` = strong preference (DD/DD+/ATMOS audio hierarchy)
 - `+1000` = major feature boost (DV Boost)
 
 Audio scoring hierarchy (same across all profiles):
 DD+ ATMOS (1350) > DD+/ATMOS undefined (1250) > TrueHD ATMOS (750) > TrueHD (650) > DD (450)
 
+Audio scores are intentionally flat across HD and UHD — the Beam 2 doesn't care what resolution precedes it, so the same hierarchy applies everywhere.
+
 TrueHD is scored positively despite Beam 2 incompatibility because releases with TrueHD always include a DD/AC3 fallback track.
+
+HDR hierarchy (UHD profiles only): generic HDR (+50) stacks with DV Boost (+1000) and HDR10+ Boost (+100) to give DV+fallback ~+1050 > HDR10+ ~+150 > HDR10 +50 > SDR 0. DV without HDR10 fallback is blocked hard (-10000) regardless.
 
 ## Editing Guidelines
 
