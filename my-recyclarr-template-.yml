@@ -577,6 +577,47 @@ sonarr:
             score: 500
 
       # ============================================================
+      # HQ RELEASE GROUPS (Sonarr only — no sqp-* equivalent exists)
+      # ============================================================
+      # TRaSH defaults (1600-1800) would drown out audio/HDR scoring; values
+      # scaled down so group quality is a real preference but not a dictator.
+      - trash_ids:
+          - d6819cba26b1a6508138d25fb5e32293 # HD Bluray Tier 01
+        assign_scores_to:
+          - name: HD
+            score: 200
+
+      - trash_ids:
+          - c2216b7b8aa545dc1ce8388c618f8d57 # HD Bluray Tier 02
+        assign_scores_to:
+          - name: HD
+            score: 150
+
+      - trash_ids:
+          - e6258996055b9fbab7e9cb2f75819294 # WEB Tier 01
+        assign_scores_to:
+          - name: HD
+            score: 175
+          - name: UHD
+            score: 175
+
+      - trash_ids:
+          - 58790d4e2fdcd9733aa7ae68ba2bb503 # WEB Tier 02
+        assign_scores_to:
+          - name: HD
+            score: 125
+          - name: UHD
+            score: 125
+
+      - trash_ids:
+          - d84935abd3f8556dcd51d4f27e22d0a6 # WEB Tier 03
+        assign_scores_to:
+          - name: HD
+            score: 75
+          - name: UHD
+            score: 75
+
+      # ============================================================
       # REPACK / PROPER (tiebreakers when a corrected release exists)
       # ============================================================
       - trash_ids:

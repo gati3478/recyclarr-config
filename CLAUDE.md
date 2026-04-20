@@ -52,7 +52,7 @@ Radarr's `score_set: sqp-1-*` pulls a TRaSH SQP baseline; our `custom_formats` b
 - **HD** — 1080p cap, no score_set (all scoring via custom_formats)
 - **UHD** — up to 2160p, no score_set
 
-Sonarr has no baseline — `custom_formats` are the sole source of scoring. When debugging a Radarr release with a score you didn't explicitly assign, check the SQP baseline; in Sonarr that can't happen.
+Sonarr has no baseline — `custom_formats` are the sole source of scoring. TRaSH does not publish a Sonarr equivalent of Radarr's `sqp-*` score_sets. To get HQ release-group scoring on Sonarr, we explicitly pull in individual tier CFs (`HD Bluray Tier 01/02`, `WEB Tier 01/02/03`) with scaled-down scores — see the `HQ RELEASE GROUPS` block. When debugging a Radarr release with a score you didn't explicitly assign, check the SQP baseline; in Sonarr that can't happen.
 
 All profiles use `reset_unmatched_scores: true` so TRaSH base scores not explicitly overridden get zeroed out.
 
@@ -63,6 +63,7 @@ All profiles use `reset_unmatched_scores: true` so TRaSH base scores not explici
 - `-50` to `-1000` = soft penalty (Scene, Retags, No-RlsGroup, x265 without HDR)
 - `+5` to `+7` = tiebreakers (Repack/Proper, Repack2, Repack3 — grab the corrected release when otherwise equal)
 - `+10` to `+100` = light preference (10bit, x265 in UHD, HDR10+, generic HDR +50)
+- `+75` to `+200` = Sonarr HQ release-group tiers (WEB Tier 01-03, HD Bluray Tier 01-02). Scaled down from TRaSH defaults (1600-1800) so audio/HDR scoring still dominates.
 - `+450` to `+1350` = strong preference (DD/DD+/ATMOS audio hierarchy)
 - `+1000` = major feature boost (DV Boost)
 
