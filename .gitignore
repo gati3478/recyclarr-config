@@ -1,1 +1,5 @@
 recyclarr.yml
+
+# SDD documentation cache (addy-agent-skills plugin)
+.claude/sdd-cache/
+
