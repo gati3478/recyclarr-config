@@ -3,9 +3,9 @@ radarr:
     base_url: http://localhost:RADARR_PORT
     api_key: RADARR_API_KEY
 
-    # Pull TRaSH quality-definition (global min/max sizes per quality).
-    include:
-      - template: radarr-quality-definition-movie
+    # TRaSH quality-definition (global min/max sizes per quality).
+    quality_definition:
+      type: movie
 
       # ============================================================
       # Option 1: HD-Kino — 1080p cap, premium groups & audio (6–16 GB)
@@ -333,9 +333,9 @@ sonarr:
     base_url: http://localhost:SONARR_PORT
     api_key: SONARR_API_KEY
 
-    # Pull TRaSH quality-definition (global min/max sizes per quality).
-    include:
-      - template: sonarr-quality-definition-series
+    # TRaSH quality-definition (global min/max sizes per quality).
+    quality_definition:
+      type: series
 
     quality_profiles:
       # ============================================================
