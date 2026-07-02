@@ -1,3 +1,5 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/recyclarr/recyclarr/master/schemas/config-schema.json
+
 radarr:
   whatbox-radarr:
     base_url: http://localhost:RADARR_PORT
@@ -7,12 +9,11 @@ radarr:
     quality_definition:
       type: movie
 
-      # ============================================================
-      # Option 1: HD-Kino — 1080p cap, premium groups & audio (6–16 GB)
-      # ============================================================
     quality_profiles:
+      # ============================================================
+      # HD-Kino — 1080p cap, premium groups & audio (~6–16 GB)
+      # ============================================================
       - name: HD-Kino
-        score_set: sqp-1-1080p # mixed 1080p base; we push top WEB/BD groups & lossless audio
         reset_unmatched_scores:
           enabled: true
         upgrade:
@@ -35,10 +36,9 @@ radarr:
             qualities: [WEBDL-480p, WEBRip-480p]
 
       # ============================================================
-      # Option 2: UHD-Kino — up to 2160p, premium (20–35 GB, IMAX ok)
+      # UHD-Kino — up to 2160p, HDR/DV capable (~20–35 GB, IMAX ok)
       # ============================================================
       - name: UHD-Kino
-        score_set: sqp-1-2160p # mixed 2160p base; prefer UHD BD/Web top tiers & lossless audio
         reset_unmatched_scores:
           enabled: true
         upgrade:
@@ -121,7 +121,7 @@ radarr:
             score: 450
 
       # ============================================================
-      # HDR/Dolby Vision (UHD focus)
+      # HDR / DOLBY VISION (UHD profile only)
       # ============================================================
       # Hard block DV without HDR fallback
       - trash_ids:
@@ -137,6 +137,7 @@ radarr:
           - name: UHD-Kino
             score: 1000
 
+      # HDR10+ Boost (not native on C1; kept as tiebreaker only)
       - trash_ids:
           - caa37d0df9c348912df1fb1d88f9273a # HDR10+ Boost
         assign_scores_to:
@@ -302,6 +303,79 @@ radarr:
             score: 10
 
       # ============================================================
+      # HQ RELEASE GROUPS
+      # ============================================================
+      # TRaSH defaults (1600-1800) would drown out audio/HDR scoring; values
+      # scaled down so group quality is a real preference but not a dictator.
+      # HD Bluray tiers also apply to UHD-Kino — it falls back to Bluray-1080p
+      # when no 2160p release exists.
+      - trash_ids:
+          - ed27ebfef2f323e964fb1f61391bcb35 # HD Bluray Tier 01
+        assign_scores_to:
+          - name: HD-Kino
+            score: 200
+          - name: UHD-Kino
+            score: 200
+
+      - trash_ids:
+          - c20c8647f2746a1f4c4262b0fbbeeeae # HD Bluray Tier 02
+        assign_scores_to:
+          - name: HD-Kino
+            score: 150
+          - name: UHD-Kino
+            score: 150
+
+      - trash_ids:
+          - 5608c71bcebba0a5e666223bae8c9227 # HD Bluray Tier 03
+        assign_scores_to:
+          - name: HD-Kino
+            score: 100
+          - name: UHD-Kino
+            score: 100
+
+      - trash_ids:
+          - 4d74ac4c4db0b64bff6ce0cffef99bf0 # UHD Bluray Tier 01
+        assign_scores_to:
+          - name: UHD-Kino
+            score: 200
+
+      - trash_ids:
+          - a58f517a70193f8e578056642178419d # UHD Bluray Tier 02
+        assign_scores_to:
+          - name: UHD-Kino
+            score: 150
+
+      - trash_ids:
+          - e71939fae578037e7aed3ee219bbe7c1 # UHD Bluray Tier 03
+        assign_scores_to:
+          - name: UHD-Kino
+            score: 100
+
+      - trash_ids:
+          - c20f169ef63c5f40c2def54abaf4438e # WEB Tier 01
+        assign_scores_to:
+          - name: HD-Kino
+            score: 175
+          - name: UHD-Kino
+            score: 175
+
+      - trash_ids:
+          - 403816d65392c79236dcb6dd591aeda4 # WEB Tier 02
+        assign_scores_to:
+          - name: HD-Kino
+            score: 125
+          - name: UHD-Kino
+            score: 125
+
+      - trash_ids:
+          - af94e0fe497124d1f9ce732069ec8c3b # WEB Tier 03
+        assign_scores_to:
+          - name: HD-Kino
+            score: 75
+          - name: UHD-Kino
+            score: 75
+
+      # ============================================================
       # REPACK / PROPER (tiebreakers when a corrected release exists)
       # ============================================================
       - trash_ids:
@@ -339,7 +413,7 @@ sonarr:
 
     quality_profiles:
       # ============================================================
-      # HD Profile — 1080p cap, balanced quality/size
+      # HD — 1080p cap, balanced quality/size
       # ============================================================
       - name: HD
         reset_unmatched_scores:
@@ -364,7 +438,7 @@ sonarr:
             qualities: [WEBDL-480p, WEBRip-480p]
 
       # ============================================================
-      # UHD Profile — up to 2160p, HDR/DV capable
+      # UHD — up to 2160p, HDR/DV capable
       # ============================================================
       - name: UHD
         reset_unmatched_scores:
@@ -449,7 +523,7 @@ sonarr:
             score: 450
 
       # ============================================================
-      # HDR/Dolby Vision (UHD only)
+      # HDR / DOLBY VISION (UHD profile only)
       # ============================================================
       # Hard block DV without HDR fallback
       - trash_ids:
@@ -465,7 +539,7 @@ sonarr:
           - name: UHD
             score: 1000
 
-      # HDR10+ Boost (not native on C1, low priority)
+      # HDR10+ Boost (not native on C1; kept as tiebreaker only)
       - trash_ids:
           - 0c4b99df9206d2cfac3c05ab897dd62a # HDR10+ Boost
         assign_scores_to:
@@ -474,11 +548,24 @@ sonarr:
 
       # Generic HDR tiebreaker — matches any HDR format (DV/HDR10/HDR10+/HLG).
       # Small +50 so any HDR release outranks the equivalent SDR release.
+      # Stacks with DV Boost and HDR10+ Boost above without disturbing their
+      # hierarchy (DV ~1050 > HDR10+ ~150 > HDR10 50 > SDR 0).
       - trash_ids:
           - 505d871304820ba7106b693be6fe4a9e # HDR
         assign_scores_to:
           - name: UHD
             score: 50
+
+      # ============================================================
+      # HYBRID (mixed-source releases)
+      # ============================================================
+      - trash_ids:
+          - 3a4127d8aa781b44120d907f2cd62627 # Hybrid
+        assign_scores_to:
+          - name: HD
+            score: 100
+          - name: UHD
+            score: 500
 
       # ============================================================
       # UNIVERSAL BLOCKS (applied to ALL profiles)
@@ -545,8 +632,9 @@ sonarr:
       # ============================================================
       # CODEC & DEPTH
       # ============================================================
+
       - trash_ids:
-          - c9eafd50846d299b862ca9bb6ea91950 # x265 (UHD)
+          - c9eafd50846d299b862ca9bb6ea91950 # x265
         assign_scores_to:
           - name: UHD
             score: 100
@@ -560,6 +648,7 @@ sonarr:
           - name: HD
             score: -100
 
+      # Proper 10-bit color depth everywhere (small nudge)
       - trash_ids:
           - b2550eb333d27b75833e25b8c2557b38 # 10bit
         assign_scores_to:
@@ -568,29 +657,27 @@ sonarr:
           - name: UHD
             score: 10
 
-      - trash_ids:
-          - 3a4127d8aa781b44120d907f2cd62627 # Hybrid
-        assign_scores_to:
-          - name: HD
-            score: 100
-          - name: UHD
-            score: 500
-
       # ============================================================
-      # HQ RELEASE GROUPS (Sonarr only — no sqp-* equivalent exists)
+      # HQ RELEASE GROUPS
       # ============================================================
       # TRaSH defaults (1600-1800) would drown out audio/HDR scoring; values
       # scaled down so group quality is a real preference but not a dictator.
+      # HD Bluray tiers also apply to UHD — it falls back to Bluray-1080p when
+      # no 2160p release exists. (TRaSH publishes no Sonarr UHD Bluray tiers.)
       - trash_ids:
           - d6819cba26b1a6508138d25fb5e32293 # HD Bluray Tier 01
         assign_scores_to:
           - name: HD
+            score: 200
+          - name: UHD
             score: 200
 
       - trash_ids:
           - c2216b7b8aa545dc1ce8388c618f8d57 # HD Bluray Tier 02
         assign_scores_to:
           - name: HD
+            score: 150
+          - name: UHD
             score: 150
 
       - trash_ids:
