@@ -20,10 +20,10 @@ recyclarr sync --preview   # dry run — show diffs without pushing
 recyclarr sync             # apply to Radarr/Sonarr
 ```
 
-Recyclarr is not installed on this machine; run it via Docker when needed:
+Recyclarr is not installed on this machine; run it via Docker when needed. Mount the repo read-only at `/repo` (not at `/config`, recyclarr's app-data dir — that scaffolds `configs/`, `logs/`, `state/` etc. into the repo) and point `-c` at the config; scaffolding then stays inside the disposable container:
 
 ```
-docker run --rm -v "$PWD:/config" ghcr.io/recyclarr/recyclarr:latest sync --preview
+docker run --rm -v "$PWD:/repo:ro" ghcr.io/recyclarr/recyclarr:latest sync --preview -c /repo/recyclarr.yml
 ```
 
 No other commands exist. There are no tests, no linting, no build steps.
