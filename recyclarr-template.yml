@@ -3,7 +3,7 @@
 radarr:
   whatbox-radarr:
     base_url: http://localhost:RADARR_PORT
-    api_key: RADARR_API_KEY
+    api_key: !secret radarr_api_key
 
     # TRaSH quality-definition (global min/max sizes per quality).
     quality_definition:
@@ -405,7 +405,7 @@ radarr:
 sonarr:
   whatbox-sonarr:
     base_url: http://localhost:SONARR_PORT
-    api_key: SONARR_API_KEY
+    api_key: !secret sonarr_api_key
 
     # TRaSH quality-definition (global min/max sizes per quality).
     quality_definition:

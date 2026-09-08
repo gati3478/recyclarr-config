@@ -8,8 +8,8 @@ Recyclarr configuration for a Direct Play-only Plex setup on a Whatbox seedbox. 
 
 ## Files
 
-- `recyclarr.yml` — Live config with real credentials and ports (gitignored; deployed via `recyclarr sync`)
-- `recyclarr-template.yml` — Shareable version, identical except for four placeholders (`RADARR_PORT`, `RADARR_API_KEY`, `SONARR_PORT`, `SONARR_API_KEY`)
+- `recyclarr.yml` — Live config with the real ports (gitignored: this repo is public and the ports are the seedbox's). Since 08-09-2026 it carries **no credential**: the two `api_key` lines are `!secret radarr_api_key` / `!secret sonarr_api_key`, resolved on the box from `~/.config/recyclarr/secrets.yml`, which exists only there.
+- `recyclarr-template.yml` — Shareable version, identical except for two placeholders (`RADARR_PORT`, `SONARR_PORT`)
 
 Both files carry a `yaml-language-server` schema header pointing at recyclarr's config schema, so schema-aware editors validate structure on save.
 
@@ -26,17 +26,22 @@ Recyclarr is not installed on this machine; run it via Docker when needed. Mount
 docker run --rm -v "$PWD:/repo:ro" ghcr.io/recyclarr/recyclarr:latest sync --preview -c /repo/recyclarr.yml
 ```
 
+Since the `!secret` split the container also needs the two keys as a `secrets.yml` mounted at `/config/secrets.yml`, and `sync` reaches Radarr and Sonarr only from the box — so the honest preview is `ssh whatbox '~/bin/recyclarr sync --preview'` (below); the Docker form is for schema validation of an edit.
+
 No other commands exist. There are no tests, no linting, no build steps.
 
 ## Deploying to the Seedbox
 
-Recyclarr runs on the whatbox itself — binary at `~/bin/recyclarr` (not on the default non-interactive PATH), config at `~/.config/recyclarr/recyclarr.yml`, SSH alias `whatbox`:
+This repo is the **author**; the deploy goes through the dotfiles repo, which governs the box's copy at `~/.config/recyclarr/recyclarr.yml` as a manifest row (`~/Development/dotfiles/private/whatbox/`, since 08-09-2026). **Never `scp` straight onto the box**: `dot-doctor` would report the box as drifted from what the repo says, and `whatbox-apply` would put the governed copy back.
 
 ```
-scp recyclarr.yml whatbox:.config/recyclarr/recyclarr.yml
-ssh whatbox '~/bin/recyclarr sync --preview'   # inspect the diff first
-ssh whatbox '~/bin/recyclarr sync'
+cp recyclarr.yml ~/Development/dotfiles/private/whatbox/files/recyclarr/recyclarr.yml
+~/Development/dotfiles/private/bin/whatbox-apply     # deploys, re-checks
+ssh whatbox '~/bin/recyclarr sync --preview'          # inspect the diff first
+ssh whatbox '~/bin/recyclarr sync'                    # or wait for Monday 04:00 UTC
 ```
+
+`dot-doctor` compares this repo's `recyclarr.yml` with the deployed copy on every run and warns when they differ — an edit here that was not deployed, or the other way round. The binary is `~/bin/recyclarr` on the box (a pinned `promises.tsv` row), not on the default non-interactive PATH.
 
 ## Template Parity (Hook-Enforced)
 
