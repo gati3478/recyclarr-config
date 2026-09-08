@@ -8,50 +8,46 @@ Recyclarr configuration for a Direct Play-only Plex setup on a Whatbox seedbox. 
 
 ## Files
 
-- `recyclarr.yml` — Live config with the real ports (gitignored: this repo is public and the ports are the seedbox's). Since 08-09-2026 it carries **no credential**: the two `api_key` lines are `!secret radarr_api_key` / `!secret sonarr_api_key`, resolved on the box from `~/.config/recyclarr/secrets.yml`, which exists only there.
-- `recyclarr-template.yml` — Shareable version, identical except for two placeholders (`RADARR_PORT`, `SONARR_PORT`)
+- `recyclarr.yml` — the live config with the real ports, **a symlink** into the dotfiles repo: `../dotfiles/private/whatbox/files/recyclarr/recyclarr.yml`, the copy that repo deploys to the box and versions. One file with two names since 09-09-2026: an edit here is the deploy source at once, and `whatbox-pull` writes the box's version back into it. Gitignored here — this repo is public and the ports are the seedbox's — so a fresh clone has no `recyclarr.yml` until the link is made:
+
+  ```
+  ln -s ../dotfiles/private/whatbox/files/recyclarr/recyclarr.yml recyclarr.yml
+  ```
+
+  It carries **no credential**: the two `api_key` lines are `!secret radarr_api_key` / `!secret sonarr_api_key`, resolved on the box from `~/.config/recyclarr/secrets.yml`, which exists only there. ⚠️ Claude Code's Edit tool refuses to write through a symlink — in a session, edit the target path in the dotfiles repo; every other editor follows the link.
+- `recyclarr-template.yml` — the shareable version, identical except for two placeholders (`RADARR_PORT`, `SONARR_PORT`)
 
 Both files carry a `yaml-language-server` schema header pointing at recyclarr's config schema, so schema-aware editors validate structure on save.
 
-## Syncing
+## Syncing and deploying
+
+Recyclarr is not installed on this machine, and `sync` reaches Radarr and Sonarr only from the box, so the deploy goes through the dotfiles repo — which governs the box's copy at `~/.config/recyclarr/recyclarr.yml` as a manifest row — and every check runs on the box. **Never `scp` straight onto the box**: `dot-doctor` would report drift, and `whatbox-apply` would put the governed copy back.
 
 ```
-recyclarr sync --preview   # dry run — show diffs without pushing
-recyclarr sync             # apply to Radarr/Sonarr
-```
-
-Recyclarr is not installed on this machine; run it via Docker when needed. Mount the repo read-only at `/repo` (not at `/config`, recyclarr's app-data dir — that scaffolds `configs/`, `logs/`, `state/` etc. into the repo) and point `-c` at the config; scaffolding then stays inside the disposable container:
-
-```
-docker run --rm -v "$PWD:/repo:ro" ghcr.io/recyclarr/recyclarr:latest sync --preview -c /repo/recyclarr.yml
-```
-
-Since the `!secret` split the container also needs the two keys as a `secrets.yml` mounted at `/config/secrets.yml`, and `sync` reaches Radarr and Sonarr only from the box — so the honest preview is `ssh whatbox '~/bin/recyclarr sync --preview'` (below); the Docker form is for schema validation of an edit.
-
-No other commands exist. There are no tests, no linting, no build steps.
-
-## Deploying to the Seedbox
-
-This repo is the **author**; the deploy goes through the dotfiles repo, which governs the box's copy at `~/.config/recyclarr/recyclarr.yml` as a manifest row (`~/Development/dotfiles/private/whatbox/`, since 08-09-2026). **Never `scp` straight onto the box**: `dot-doctor` would report the box as drifted from what the repo says, and `whatbox-apply` would put the governed copy back.
-
-```
-cp recyclarr.yml ~/Development/dotfiles/private/whatbox/files/recyclarr/recyclarr.yml
-~/Development/dotfiles/private/bin/whatbox-apply     # deploys, re-checks
-ssh whatbox '~/bin/recyclarr sync --preview'          # inspect the diff first
+~/Development/dotfiles/private/bin/whatbox-apply     # deploys the edited file, re-checks
+ssh whatbox '~/bin/recyclarr sync --preview'          # the parse and the diff, against today's guide
 ssh whatbox '~/bin/recyclarr sync'                    # or wait for Monday 04:00 UTC
 ```
 
-`dot-doctor` compares this repo's `recyclarr.yml` with the deployed copy on every run and warns when they differ — an edit here that was not deployed, or the other way round. The binary is `~/bin/recyclarr` on the box (a pinned `promises.tsv` row), not on the default non-interactive PATH.
+`--preview` exits 0 on a config parse error — read its output, not its exit code. The binary is `~/bin/recyclarr` on the box (a pinned `promises.tsv` row), not on the default non-interactive PATH. A Docker form of the preview used to live here; retired 09-09-2026 — it validated parsing only, needed a dummy `secrets.yml` mounted to parse at all, and the `latest` tag it named no longer exists.
 
-## Template Parity (Hook-Enforced)
+No other commands exist. There are no tests, no linting, no build steps.
 
-`recyclarr.yml` and `recyclarr-template.yml` must stay identical except credentials:
+## Template parity (doctor-asserted)
+
+`recyclarr.yml` and `recyclarr-template.yml` must stay identical except for the two `base_url` lines:
 
 ```
-diff recyclarr.yml recyclarr-template.yml
+diff recyclarr.yml recyclarr-template.yml    # exactly 2 differing lines, both base_url
 ```
 
-Expected output: exactly 4 differing lines (the two `base_url` and two `api_key` lines — one pair for Radarr, one for Sonarr). A PostToolUse hook (`~/.claude/hooks/recyclarr-validate.sh`) enforces this after every Write/Edit to either file, so editing one raises a blocking error until the other matches. Edit `recyclarr.yml` first, then regenerate the template from it by substituting the four credential values — never hand-edit the template into drift.
+`dot-doctor` in the dotfiles repo asserts this on every run, and that `recyclarr.yml` here is the link. Edit `recyclarr.yml` first, then regenerate the template from it — never hand-edit the template into drift:
+
+```
+awk '/^radarr:/{s="RADARR"} /^sonarr:/{s="SONARR"} {sub(/localhost:[0-9]+/, "localhost:" s "_PORT"); print}' recyclarr.yml > recyclarr-template.yml
+```
+
+(A PostToolUse hook used to claim this job. It was scoped to a mistyped path and never fired, and its rule of four differing lines had been two since the `!secret` split; retired 09-09-2026.)
 
 ## Hardware Constraints (These Drive All Scoring Decisions)
 
@@ -102,6 +98,6 @@ HDR hierarchy (UHD profiles only): generic HDR (+50) stacks with DV Boost (+1000
 ## Editing Guidelines
 
 - Radarr and Sonarr use **different `trash_ids`** for the same format name. Never copy a trash_id between the radarr and sonarr sections.
-- Change `recyclarr.yml` first, then regenerate `recyclarr-template.yml` from it (substituting the four credential values). The parity hook blocks anything else.
+- Change `recyclarr.yml` first, then regenerate `recyclarr-template.yml` from it with the `awk` line under Template parity. The doctor warns until they match.
 - Every `trash_id` entry has an inline comment with the format's exact guide name (e.g., `# DTS-HD MA`). Keep comments verbatim-identical to the TRaSH guide `name` field so they can be verified mechanically against the guide JSON (`docs/json/{radarr,sonarr}/cf/*.json` in the TRaSH-Guides repo).
 - Scores assigned to profiles within the same `assign_scores_to` block typically share the same value across profiles unless there's a specific reason to differ (e.g., LQ is `-2500` for HD but `-4500` for UHD — UHD junk costs more disk and lives longer, so it's penalized harder).

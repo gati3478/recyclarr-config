@@ -49,14 +49,14 @@ One profile per resolution on each side — two Radarr profiles for movies, two 
 
 - Remux/BR-DISK blocked (too large; pointless for Direct Play)
 - Scene releases slightly penalized (prefer P2P quality)
-- Low-quality, obfuscated, and re-tagged releases heavily penalized
+- Low-quality and obfuscated releases heavily penalized; re-tags nudged down
 - Repack/Proper scored +5…+7 as pure tiebreakers — grab the corrected release when otherwise equal
 
 ## Usage
 
 1. Install [Recyclarr](https://recyclarr.dev/) (or use the Docker image)
 2. Copy `recyclarr-template.yml` to `recyclarr.yml`
-3. Replace the four placeholders: `RADARR_PORT`, `RADARR_API_KEY`, `SONARR_PORT`, `SONARR_API_KEY`
+3. Replace the two placeholders, `RADARR_PORT` and `SONARR_PORT`, and put the two API keys in a `secrets.yml` beside recyclarr's config as `radarr_api_key` / `sonarr_api_key` — the file references them with `!secret`
 4. Preview, then apply:
 
 ```sh
@@ -66,4 +66,4 @@ recyclarr sync
 
 ## Why These Choices?
 
-The scoring is opinionated toward a Direct Play workflow where file size matters but quality can't be sacrificed. One profile per resolution pursues the best release that still fits the size envelope (~6–16 GB at 1080p, ~20–35 GB at 2160p) — no 60 GB remuxes, no garbage compressions. Everything respects the hard constraint: if Plex can't Direct Play it, it won't play at all.
+The scoring is opinionated toward a Direct Play workflow where file size matters but quality can't be sacrificed. One profile per resolution pursues the best release that still fits the size envelope (~6–16 GB at 1080p, ~20–35 GB at 2160p) — no 60 GB remuxes, no garbage compressions. The envelope is what the blocks and tiers yield, not a cap: the quality definition follows the guide's movie/series set, which sets no maximum. Everything respects the hard constraint: if Plex can't Direct Play it, it won't play at all.
