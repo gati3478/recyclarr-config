@@ -8,13 +8,14 @@ Recyclarr configuration for a Direct Play-only Plex setup on a Whatbox seedbox. 
 
 ## Files
 
-- `recyclarr.yml` — the live config with the real ports, **a symlink** into the dotfiles repo: `../dotfiles/private/whatbox/files/recyclarr/recyclarr.yml`, the copy that repo deploys to the box and versions. One file with two names since 09-09-2026: an edit here is the deploy source at once, and `whatbox-pull` writes the box's version back into it. Gitignored here — this repo is public and the ports are the seedbox's — so a fresh clone has no `recyclarr.yml` until the link is made:
+- `recyclarr.yml` — the live config with the real ports, **a symlink** into the dotfiles repo: `../dotfiles/hosts/whatbox/files/recyclarr/recyclarr.yml`, the copy that repo deploys to the box and versions. One file with two names since 09-09-2026: an edit here is the deploy source at once, and `whatbox-pull` writes the box's version back into it. Gitignored here — this repo is public and the ports are the seedbox's — so a fresh clone has no `recyclarr.yml` until the link is made:
 
   ```
-  ln -s ../dotfiles/private/whatbox/files/recyclarr/recyclarr.yml recyclarr.yml
+  ln -s ../dotfiles/hosts/whatbox/files/recyclarr/recyclarr.yml recyclarr.yml
   ```
 
   It carries **no credential**: the two `api_key` lines are `!secret radarr_api_key` / `!secret sonarr_api_key`, resolved on the box from `~/.config/recyclarr/secrets.yml`, which exists only there. ⚠️ Claude Code's Edit tool refuses to write through a symlink — in a session, edit the target path in the dotfiles repo; every other editor follows the link.
+
 - `recyclarr-template.yml` — the shareable version, identical except for two placeholders (`RADARR_PORT`, `SONARR_PORT`)
 
 Both files carry a `yaml-language-server` schema header pointing at recyclarr's config schema, so schema-aware editors validate structure on save.
@@ -24,9 +25,9 @@ Both files carry a `yaml-language-server` schema header pointing at recyclarr's 
 Recyclarr is not installed on this machine, and `sync` reaches Radarr and Sonarr only from the box, so the deploy goes through the dotfiles repo — which governs the box's copy at `~/.config/recyclarr/recyclarr.yml` as a manifest row — and every check runs on the box. **Never `scp` straight onto the box**: `dot-doctor` would report drift, and `whatbox-apply` would put the governed copy back.
 
 ```
-~/Development/dotfiles/private/bin/whatbox-apply     # deploys the edited file, re-checks
-ssh whatbox '~/bin/recyclarr sync --preview'          # the parse and the diff, against today's guide
-ssh whatbox '~/bin/recyclarr sync'                    # or wait for Monday 04:00 UTC
+~/Development/dotfiles/hosts/whatbox/bin/whatbox-apply   # deploys the edited file, re-checks
+ssh whatbox '~/bin/recyclarr sync --preview'             # the parse and the diff, against today's guide
+ssh whatbox '~/bin/recyclarr sync'                       # or wait for Monday 04:00 UTC
 ```
 
 `--preview` exits 0 on a config parse error — read its output, not its exit code. The binary is `~/bin/recyclarr` on the box (a pinned `promises.tsv` row), not on the default non-interactive PATH. A Docker form of the preview used to live here; retired 09-09-2026 — it validated parsing only, needed a dummy `secrets.yml` mounted to parse at all, and the `latest` tag it named no longer exists.
