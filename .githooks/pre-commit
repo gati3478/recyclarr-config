@@ -21,8 +21,13 @@ check() {   # check <name>, the file's bytes on stdin
     {
       line = $0
       sub(/[[:space:]]#.*$/, "", line)   # an inline comment is not a value
-      if (match(line, key) && substr(line, RSTART + RLENGTH) !~ /^[[:space:]]*!secret[[:space:]]+[[:alnum:]_]+/) {
-        print f ":" NR ": a base_url or api_key that is not a !secret reference"; bad = 1
+      rest = line   # every key on the line; each value is a !secret name and nothing more
+      while (match(rest, key)) {
+        rest = substr(rest, RSTART + RLENGTH)
+        if (rest !~ /^[[:space:]]*!secret[[:space:]]+[[:alnum:]_]+[[:space:]]*([,}]|$)/) {
+          print f ":" NR ": a base_url or api_key that is not a !secret reference"; bad = 1
+          break
+        }
       }
       if (line ~ /:\/\//) {
         print f ":" NR ": a URL"; bad = 1
@@ -41,7 +46,13 @@ if [ $# -gt 0 ]; then
   exit "$status"
 fi
 
-failed="$(git diff --cached --name-only --diff-filter=ACMR | while IFS= read -r f; do
+# Every staged change but a deletion — a type change included. Names come
+# unquoted so a non-ASCII one reads back; a name git still quotes, or any
+# entry it cannot show, is refused rather than passed unread.
+failed="$(git -c core.quotePath=false diff --cached --name-only --diff-filter=d | while IFS= read -r f; do
+  if ! git cat-file -e ":$f" 2>/dev/null; then
+    echo "pre-commit: cannot read the staged $f" >&2; echo "$f"; continue
+  fi
   git show ":$f" | check "$f" || echo "$f"
 done)"
 [ -z "$failed" ] || { echo "pre-commit: refused — move the value into the box's secrets.yml and reference it with !secret" >&2; exit 1; }
