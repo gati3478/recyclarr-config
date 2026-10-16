@@ -1,32 +1,37 @@
 # Release titles and what each profile must do with them; tests/scores checks
 # every row. Columns, tab-separated: kind, service, profile, title.
-#   block        the profile rejects it — a score below its minimum, or a
-#                quality it leaves off: never grabbed
-#   allow        the score reaches the minimum, in a quality the profile
-#                allows: grabbable
-#   ladder:NAME  rows sharing NAME, service and profile score strictly
-#                lower in the order listed — best first
-# Titles are realistic shapes, not real releases; each varies one feature.
+#   block:score    the score falls below the profile's minimum, whatever the
+#                  quality: never grabbed
+#   block:quality  the parsed quality is one the profile leaves off
+#   allow          the score reaches the minimum, in a quality the profile
+#                  allows: grabbable
+#   ladder:NAME    allow, and rows sharing NAME, service and profile score
+#                  strictly lower in the order listed — best first
+# Each block kind checks one reason, so a title blocked both ways takes a row
+# of each. A title whose quality parses to nothing or to Unknown fails, whatever
+# its kind. Titles are realistic shapes, not real releases; each varies one
+# feature.
 
 # ── Radarr: what the hardware cannot play ──────────────────────────────────
-block	radarr	HD-Kino	Dune.Part.Two.2024.1080p.BluRay.DTS-HD.MA.7.1.x264-GRP
-block	radarr	UHD-Kino	Dune.Part.Two.2024.2160p.UHD.BluRay.DTS-X.7.1.DV.HDR.x265-GRP
-block	radarr	HD-Kino	Movie.Title.2023.1080p.WEB-DL.DDP5.1.DV.H.265-GRP
-block	radarr	UHD-Kino	Movie.Title.2023.2160p.WEB-DL.DDP5.1.Atmos.DV.H.265-GRP
-block	radarr	HD-Kino	Movie.Title.2023.1080p.WEB-DL.DDP5.1.AV1-GRP
-block	radarr	UHD-Kino	Movie.Title.2023.2160p.WEB-DL.DDP5.1.Atmos.HDR.AV1-GRP
+block:score	radarr	HD-Kino	Dune.Part.Two.2024.1080p.BluRay.DTS-HD.MA.7.1.x264-GRP
+block:score	radarr	UHD-Kino	Dune.Part.Two.2024.2160p.UHD.BluRay.DTS-X.7.1.DV.HDR.x265-GRP
+block:score	radarr	HD-Kino	Movie.Title.2023.1080p.WEB-DL.DDP5.1.DV.H.265-GRP
+block:score	radarr	UHD-Kino	Movie.Title.2023.2160p.WEB-DL.DDP5.1.Atmos.DV.H.265-GRP
+block:score	radarr	HD-Kino	Movie.Title.2023.1080p.WEB-DL.DDP5.1.AV1-GRP
+block:score	radarr	UHD-Kino	Movie.Title.2023.2160p.WEB-DL.DDP5.1.Atmos.HDR.AV1-GRP
 
 # ── Radarr: remuxes, by quality — the profiles leave them off ──────────────
-block	radarr	HD-Kino	Movie.Title.2023.1080p.BluRay.REMUX.AVC.DDP5.1.Atmos-FraMeSToR
-block	radarr	UHD-Kino	Movie.Title.2023.2160p.UHD.BluRay.REMUX.DV.HDR.HEVC.TrueHD.7.1.Atmos-FraMeSToR
+block:quality	radarr	HD-Kino	Movie.Title.2023.1080p.BluRay.REMUX.AVC.DDP5.1.Atmos-FraMeSToR
+block:quality	radarr	UHD-Kino	Movie.Title.2023.2160p.UHD.BluRay.REMUX.DV.HDR.HEVC.TrueHD.7.1.Atmos-FraMeSToR
 
 # ── Radarr: the guide's unwanted formats ───────────────────────────────────
-block	radarr	UHD-Kino	Movie.Title.2023.COMPLETE.UHD.BLURAY-GRP
-block	radarr	HD-Kino	Movie.Title.2010.1080p.3D.BluRay.Half-SBS.x264.DD5.1-GRP
-block	radarr	UHD-Kino	Movie.Title.1999.2160p.UpScaled.WEB-DL.DDP5.1.H.265-GRP
-block	radarr	HD-Kino	Frozen.2013.Sing-Along.1080p.BluRay.DD5.1.x264-GRP
-block	radarr	HD-Kino	Movie.Title.2023.1080p.WEB-DL.Line.Dubbed.x264-GRP
-block	radarr	HD-Kino	Movie.Title.1960.Black.and.White.1080p.BluRay.DD5.1.x264-GRP
+block:score	radarr	UHD-Kino	Movie.Title.2023.COMPLETE.UHD.BLURAY-GRP
+block:quality	radarr	UHD-Kino	Movie.Title.2023.COMPLETE.UHD.BLURAY-GRP
+block:score	radarr	HD-Kino	Movie.Title.2010.1080p.3D.BluRay.Half-SBS.x264.DD5.1-GRP
+block:score	radarr	UHD-Kino	Movie.Title.1999.2160p.UpScaled.WEB-DL.DDP5.1.H.265-GRP
+block:score	radarr	HD-Kino	Frozen.2013.Sing-Along.1080p.BluRay.DD5.1.x264-GRP
+block:score	radarr	HD-Kino	Movie.Title.2023.1080p.WEB-DL.Line.Dubbed.x264-GRP
+block:score	radarr	HD-Kino	Movie.Title.1960.Black.and.White.1080p.BluRay.DD5.1.x264-GRP
 
 # ── Radarr: audio, flat across both profiles ───────────────────────────────
 ladder:audio	radarr	HD-Kino	Movie.Title.2023.1080p.BluRay.DDP5.1.Atmos.x264-GRP
@@ -35,7 +40,6 @@ ladder:audio	radarr	HD-Kino	Movie.Title.2023.1080p.BluRay.TrueHD.7.1.Atmos.x264-
 ladder:audio	radarr	HD-Kino	Movie.Title.2023.1080p.BluRay.TrueHD.7.1.x264-GRP
 ladder:audio	radarr	HD-Kino	Movie.Title.2023.1080p.BluRay.DD5.1.x264-GRP
 ladder:audio	radarr	HD-Kino	Movie.Title.2023.1080p.BluRay.AAC2.0.x264-GRP
-allow	radarr	HD-Kino	Movie.Title.2023.1080p.BluRay.AAC2.0.x264-GRP
 ladder:audio	radarr	UHD-Kino	Movie.Title.2023.2160p.UHD.BluRay.DDP5.1.Atmos.HDR.x265-GRP
 ladder:audio	radarr	UHD-Kino	Movie.Title.2023.2160p.UHD.BluRay.TrueHD.7.1.Atmos.HDR.x265-GRP
 ladder:audio	radarr	UHD-Kino	Movie.Title.2023.2160p.UHD.BluRay.DD5.1.HDR.x265-GRP
@@ -61,40 +65,40 @@ ladder:tier	radarr	HD-Kino	Movie.Title.2023.1080p.WEB-DL.DDP5.1.H.264-ABBIE
 ladder:tier	radarr	HD-Kino	Movie.Title.2023.1080p.WEB-DL.DDP5.1.H.264-GRP
 
 # ── Radarr: suspect releases, penalized alike in HD and UHD ────────────────
-block	radarr	HD-Kino	Movie.Title.2023.1080p.BluRay.Hybrid.TrueHD.7.1.Atmos.x264
+block:score	radarr	HD-Kino	Movie.Title.2023.1080p.BluRay.Hybrid.TrueHD.7.1.Atmos.x264
 allow	radarr	UHD-Kino	Movie.Title.2023.2160p.WEB-DL.DDP5.1.Atmos.DV.HDR.10bit.H.265-BlackBit
 
 # ── Radarr: HD x265 with no HDR gets in only with DD+ ──────────────────────
-block	radarr	HD-Kino	Movie.Title.2023.1080p.BluRay.DD5.1.x265-GRP
+block:score	radarr	HD-Kino	Movie.Title.2023.1080p.BluRay.DD5.1.x265-GRP
 allow	radarr	HD-Kino	Movie.Title.2023.1080p.BluRay.DDP5.1.x265-GRP
 ladder:x265	radarr	HD-Kino	Movie.Title.2023.1080p.BluRay.DDP5.1.x264-GRP
 ladder:x265	radarr	HD-Kino	Movie.Title.2023.1080p.BluRay.DDP5.1.x265-GRP
 
 # ── Sonarr: what the hardware cannot play ──────────────────────────────────
-block	sonarr	HD	Show.Title.S01E01.1080p.BluRay.DTS-HD.MA.5.1.x264-GRP
-block	sonarr	UHD	Show.Title.S01E01.2160p.WEB-DL.DDP5.1.Atmos.DV.H.265-GRP
-block	sonarr	HD	Show.Title.S01E01.1080p.WEB-DL.DDP5.1.DV.H.265-GRP
-block	sonarr	HD	Show.Title.S01E01.1080p.WEB-DL.DDP5.1.AV1-GRP
+block:score	sonarr	HD	Show.Title.S01E01.1080p.BluRay.DTS-HD.MA.5.1.x264-GRP
+block:score	sonarr	UHD	Show.Title.S01E01.2160p.WEB-DL.DDP5.1.Atmos.DV.H.265-GRP
+block:score	sonarr	HD	Show.Title.S01E01.1080p.WEB-DL.DDP5.1.DV.H.265-GRP
+block:score	sonarr	HD	Show.Title.S01E01.1080p.WEB-DL.DDP5.1.AV1-GRP
 
 # ── Sonarr: remuxes, by quality ────────────────────────────────────────────
-block	sonarr	HD	Show.Title.S01E01.1080p.BluRay.REMUX.AVC.TrueHD.5.1-GRP
-block	sonarr	UHD	Show.Title.S01E01.2160p.BluRay.REMUX.DV.HDR.HEVC.TrueHD.7.1.Atmos-GRP
+block:quality	sonarr	HD	Show.Title.S01E01.1080p.BluRay.REMUX.AVC.TrueHD.5.1-GRP
+block:quality	sonarr	UHD	Show.Title.S01E01.2160p.BluRay.REMUX.DV.HDR.HEVC.TrueHD.7.1.Atmos-GRP
 
 # ── Sonarr: the guide's unwanted formats ───────────────────────────────────
-block	sonarr	UHD	Show.Title.S01.COMPLETE.UHD.BLURAY-GRP
-block	sonarr	HD	Show.Title.S01E01.1080p.UpScaled.WEB-DL.DDP5.1.H.264-GRP
-block	sonarr	HD	Show.Title.S01E01.Black.and.White.1080p.WEB-DL.DDP5.1.H.264-GRP
+block:score	sonarr	UHD	Show.Title.S01.COMPLETE.UHD.BLURAY-GRP
+block:score	sonarr	HD	Show.Title.S01E01.1080p.UpScaled.WEB-DL.DDP5.1.H.264-GRP
+block:score	sonarr	HD	Show.Title.S01E01.Black.and.White.1080p.WEB-DL.DDP5.1.H.264-GRP
 
 # ── Sonarr: release groups ─────────────────────────────────────────────────
 ladder:tier	sonarr	HD	Show.Title.S01E01.1080p.WEB-DL.DDP5.1.H.264-ABBiE
 ladder:tier	sonarr	HD	Show.Title.S01E01.1080p.WEB-DL.DDP5.1.H.264-GRP
 
 # ── Sonarr: suspect releases, penalized as in Radarr ───────────────────────
-block	sonarr	HD	Show.Title.S01E01.1080p.BluRay.Hybrid.TrueHD.7.1.Atmos.x264
+block:score	sonarr	HD	Show.Title.S01E01.1080p.BluRay.Hybrid.TrueHD.7.1.Atmos.x264
 allow	sonarr	UHD	Show.Title.S01E01.2160p.WEB-DL.DDP5.1.Atmos.DV.HDR.10bit.H.265-BlackBit
 
 # ── Sonarr: HD x265 with no HDR gets in with DD or better ──────────────────
-block	sonarr	HD	Show.Title.S01E01.1080p.WEB-DL.AAC2.0.x265-GRP
+block:score	sonarr	HD	Show.Title.S01E01.1080p.WEB-DL.AAC2.0.x265-GRP
 allow	sonarr	HD	Show.Title.S01E01.1080p.WEB-DL.DD5.1.x265-GRP
 ladder:x265	sonarr	HD	Show.Title.S01E01.1080p.WEB-DL.DD5.1.H.264-GRP
 ladder:x265	sonarr	HD	Show.Title.S01E01.1080p.WEB-DL.DD5.1.x265-GRP
@@ -104,7 +108,6 @@ ladder:audio	sonarr	HD	Show.Title.S01E01.1080p.WEB-DL.DDP5.1.Atmos.H.264-GRP
 ladder:audio	sonarr	HD	Show.Title.S01E01.1080p.WEB-DL.DDP5.1.H.264-GRP
 ladder:audio	sonarr	HD	Show.Title.S01E01.1080p.WEB-DL.DD5.1.H.264-GRP
 ladder:audio	sonarr	HD	Show.Title.S01E01.1080p.WEB-DL.AAC2.0.H.264-GRP
-allow	sonarr	HD	Show.Title.S01E01.1080p.WEB-DL.AAC2.0.H.264-GRP
 ladder:hdr	sonarr	UHD	Show.Title.S01E01.2160p.WEB-DL.DDP5.1.Atmos.DV.HDR.H.265-GRP
 ladder:hdr	sonarr	UHD	Show.Title.S01E01.2160p.WEB-DL.DDP5.1.Atmos.HDR10+.H.265-GRP
 ladder:hdr	sonarr	UHD	Show.Title.S01E01.2160p.WEB-DL.DDP5.1.Atmos.HDR.H.265-GRP

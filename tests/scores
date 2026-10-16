@@ -3,11 +3,13 @@
 # matcher against their live profiles on the box, and checks each row. It
 # tests what the *arrs hold, so run it after a sync, not after an edit.
 case "${1:-}" in
-  -h|--help) echo "usage: tests/scores — checks tests/releases.tsv on the box (ssh whatbox); exit 0 all pass, 1 a row failed"; exit 0 ;;
+  -h|--help) echo "usage: tests/scores [TABLE] — checks TABLE, default tests/releases.tsv, on the box (ssh whatbox); exit 0 all pass, 1 a row failed, 2 TABLE unreadable"; exit 0 ;;
 esac
 set -eu
 here="$(cd "$(dirname "$0")" && pwd)"
+table="${1:-$here/releases.tsv}"
+[ -r "$table" ] || { echo "tests/scores: cannot read $table" >&2; exit 2; }
 # The table travels inside the program as a string literal: JSON's string
 # syntax is valid Python, and nothing is written on the box.
-data="$(python3 -I -c 'import json, sys; print(json.dumps(open(sys.argv[1]).read()))' "$here/releases.tsv")"
+data="$(python3 -I -c 'import json, sys; print(json.dumps(open(sys.argv[1]).read()))' "$table")"
 { cat "$here/scores.py"; printf '\nmain(%s)\n' "$data"; } | ssh whatbox python3 -

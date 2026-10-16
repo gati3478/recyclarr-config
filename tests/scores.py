@@ -16,7 +16,11 @@ import urllib.parse
 import urllib.request
 
 SECRETS = os.path.expanduser("~/.config/recyclarr/secrets.yml")
+BLOCK_SCORE = "block:score"
+BLOCK_QUALITY = "block:quality"
+ALLOW = "allow"
 LADDER = "ladder:"
+UNPARSED = {None, "Unknown"}   # an unreadable title: Sonarr parses no info, Radarr says Unknown
 
 
 def read_secrets():
@@ -89,15 +93,23 @@ def main(tsv):
             continue
         score, names, floor = arr.score(profile, title)
         quality, allowed = arr.quality(profile, title)
+        grabbable = score >= floor and allowed
         why = ""
-        if kind == "block":
-            ok = score < floor or not allowed
-        elif kind == "allow":
-            ok = score >= floor and allowed
+        if quality in UNPARSED:
+            ok = False
+            why = "  (no quality parsed)"
+        elif kind == BLOCK_SCORE:
+            ok = score < floor
+        elif kind == BLOCK_QUALITY:
+            ok = not allowed
+        elif kind == ALLOW:
+            ok = grabbable
         elif kind.startswith(LADDER):
             prev = ladders.get((kind, service, profile))
-            ok = prev is None or score < prev[1]
-            if prev is not None and not ok:
+            ok = grabbable and (prev is None or score < prev[1])
+            if not grabbable:
+                why = "  (not grabbable)"
+            elif prev is not None and not ok:
                 why = f"  (must score below line {prev[0]}: {prev[1]})"
             ladders[(kind, service, profile)] = (n, score)
         else:
