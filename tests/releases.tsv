@@ -8,9 +8,11 @@
 #   ladder:NAME    allow, and rows sharing NAME, service and profile score
 #                  strictly lower in the order listed — best first
 # Each block kind checks one reason, so a title blocked both ways takes a row
-# of each. A title whose quality parses to nothing or to Unknown fails, whatever
-# its kind. Titles are realistic shapes, not real releases; most vary one
-# feature from a plain release.
+# of each. Whatever its kind, a row fails when its quality parses to nothing or
+# to Unknown, when its title names no resolution (480p to 2160p, 4K or UHD; the
+# parser would fall back to a default quality), or when it is a one-row ladder.
+# Titles are realistic shapes, not real releases; most vary one feature from a
+# plain release.
 
 # ── Radarr: what the hardware cannot play ──────────────────────────────────
 block:score	radarr	HD-Kino	Dune.Part.Two.2024.1080p.BluRay.DTS-HD.MA.7.1.x264-GRP

@@ -14,13 +14,19 @@ import re
 import sys
 import urllib.parse
 import urllib.request
+from collections import Counter
 
 SECRETS = os.path.expanduser("~/.config/recyclarr/secrets.yml")
+COLUMNS = 4
 BLOCK_SCORE = "block:score"
 BLOCK_QUALITY = "block:quality"
 ALLOW = "allow"
+KINDS = {BLOCK_SCORE, BLOCK_QUALITY, ALLOW}
 LADDER = "ladder:"
 UNPARSED = {None, "Unknown"}   # an unreadable title: no parsed info, or a quality of Unknown
+# A title naming no resolution still parses, to a fallback (SDTV, WEBDL-480p)
+# indistinguishable from the real quality, so the title must name one.
+RESOLUTION = re.compile(r"(?i)(?:^|[._ -])(?:(?:480|576|720|1080|2160)[pi]|4k|uhd)(?:$|[._ -])")
 
 
 def read_secrets():
@@ -75,15 +81,30 @@ class Arr:
         return name, name in self.allowed[profile]
 
 
+def rows(tsv):
+    """Each data row: its line number and its tab-separated fields."""
+    for n, line in enumerate(tsv.splitlines(), 1):
+        if line.strip() and not line.startswith("#"):
+            yield n, line.split("\t")
+
+
 def main(tsv):
     secrets = read_secrets()
     arrs = {}
+    table = list(rows(tsv))
+    rungs = Counter(tuple(f[:3]) for _, f in table if len(f) == COLUMNS and f[0].startswith(LADDER))
     ladders = {}   # (ladder, service, profile) -> the previous row's (line, score)
     passed = failed = 0
-    for n, line in enumerate(tsv.splitlines(), 1):
-        if not line.strip() or line.startswith("#"):
+    for n, fields in table:
+        if len(fields) != COLUMNS:
+            print(f"FAIL  line {n}: {len(fields)} tab-separated fields, not {COLUMNS}")
+            failed += 1
             continue
-        kind, service, profile, title = line.split("\t")
+        kind, service, profile, title = fields
+        if service + "_url" not in secrets:
+            print(f"FAIL  line {n}: no service {service!r}")
+            failed += 1
+            continue
         if service not in arrs:
             arrs[service] = Arr(secrets[service + "_url"], secrets[service + "_api_key"])
         arr = arrs[service]
@@ -94,17 +115,26 @@ def main(tsv):
         score, names, floor = arr.score(profile, title)
         quality, allowed = arr.quality(profile, title)
         grabbable = score >= floor and allowed
-        why = ""
+        faults = []
+        if kind not in KINDS and not kind.startswith(LADDER):
+            faults.append(f"unknown kind {kind!r}")
         if quality in UNPARSED:
+            faults.append("no quality parsed")
+        if not RESOLUTION.search(title):
+            faults.append("the title names no resolution, so its quality is the parser's fallback")
+        if kind.startswith(LADDER) and rungs[(kind, service, profile)] < 2:
+            faults.append("a one-row ladder compares nothing")
+        why = ""
+        if faults:
             ok = False
-            why = "  (no quality parsed)"
+            why = f"  ({'; '.join(faults)})"
         elif kind == BLOCK_SCORE:
             ok = score < floor
         elif kind == BLOCK_QUALITY:
             ok = not allowed
         elif kind == ALLOW:
             ok = grabbable
-        elif kind.startswith(LADDER):
+        else:   # a ladder: faults above caught every other kind
             prev = ladders.get((kind, service, profile))
             ok = grabbable and (prev is None or score < prev[1])
             if not grabbable:
@@ -112,15 +142,12 @@ def main(tsv):
             elif prev is not None and not ok:
                 why = f"  (must score below line {prev[0]}: {prev[1]})"
             ladders[(kind, service, profile)] = (n, score)
-        else:
-            ok = False
-            why = f"  (unknown kind {kind!r})"
         off = "" if allowed else " (off)"
         print(f"{'PASS' if ok else 'FAIL'}  {service:<6} {profile:<8} {kind:<15} {score:>6}  {title}  {quality}{off}  [{', '.join(names)}]{why}")
         passed += ok
         failed += not ok
-    print(f"== {passed} passed, {failed} failed ==")
     if passed + failed == 0:
         print("== no rows: nothing was checked ==")
         sys.exit(1)
+    print(f"== {passed} passed, {failed} failed ==")
     sys.exit(1 if failed else 0)
