@@ -65,11 +65,11 @@ radarr:
           - name: WEB 720p
             qualities: [WEBDL-720p, WEBRip-720p]
 
-    # The guide's Unwanted formats, adopted whole at its -10000, so a format
-    # the guide adds later arrives blocked rather than at 0. An entry under
-    # custom_formats overrides a member per profile; a decline goes under
-    # `exclude:` with its reason. AV1 is a member: Plex on the C1 always
-    # transcodes it, and nothing here can.
+    # The guide's Unwanted formats, adopted at its -10000 with every member it
+    # marks default, so a default the guide adds later arrives blocked rather
+    # than at 0. An entry under custom_formats overrides a member per profile;
+    # a decline goes under `exclude:` with its reason. AV1 is a member: Plex on
+    # the C1 always transcodes it, and nothing here can.
     custom_format_groups:
       add:
         - trash_id: a3ac6af01d78e4f21fcb75f601ac96df # [Unwanted] Unwanted Formats

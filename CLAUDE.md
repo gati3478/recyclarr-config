@@ -11,7 +11,7 @@ Recyclarr configuration for a Direct Play-only Plex setup on a Whatbox seedbox. 
 - `recyclarr.yml` — the live config, versioned here. It names no port and no key: `base_url` and `api_key` are `!secret radarr_url` / `!secret radarr_api_key` and the Sonarr pair, resolved on the box from `~/.config/recyclarr/secrets.yml`, which exists only there. plumage deploys it through a link — `~/Development/plumage/hosts/whatbox/files/recyclarr/recyclarr.yml` → `../../../../../recyclarr/recyclarr.yml` — so a plumage clone needs this repo cloned beside it.
 - `README.md` — the public design write-up.
 - `.githooks/pre-commit` — the publishing guard (below).
-- `tests/` — the scoring battery: `releases.tsv` holds release titles and what each profile must do with them; `scores` checks them on the box. `parity` checks, locally, that Radarr and Sonarr give the formats both list under `custom_formats` the same scores; it does not compare group adoption.
+- `tests/` — the scoring battery: `releases.tsv` holds release titles and what each profile must do with them; `scores` checks them on the box. `parity` checks, locally, that Radarr and Sonarr give the formats both list under `custom_formats` the same scores, and fails a name only one side lists unless its allowlist says why; it does not compare group adoption.
 
 The file carries a `yaml-language-server` schema header, so schema-aware editors validate it on save.
 

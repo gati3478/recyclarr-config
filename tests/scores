@@ -8,7 +8,7 @@ esac
 set -eu
 here="$(cd "$(dirname "$0")" && pwd)"
 table="${1:-$here/releases.tsv}"
-[ -f "$table" ] && [ -r "$table" ] || { echo "tests/scores: cannot read $table" >&2; exit 2; }
+[ -r "$table" ] && [ ! -d "$table" ] || { echo "tests/scores: cannot read $table" >&2; exit 2; }
 # The table travels inside the program as a string literal: JSON's string
 # syntax is valid Python, and nothing is written on the box.
 data="$(python3 -I -c 'import json, sys; print(json.dumps(open(sys.argv[1]).read()))' "$table")"
