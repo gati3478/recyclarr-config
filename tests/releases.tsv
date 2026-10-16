@@ -71,6 +71,8 @@ ladder:version	radarr	HD-Kino	Movie.Title.1982.Criterion.1080p.BluRay.DDP5.1.x26
 ladder:version	radarr	HD-Kino	Movie.Title.1982.4K.Remaster.1080p.BluRay.DDP5.1.x264-GRP
 ladder:version	radarr	HD-Kino	Movie.Title.1982.Remastered.1080p.BluRay.DDP5.1.x264-GRP
 ladder:version	radarr	HD-Kino	Movie.Title.1982.1080p.BluRay.DDP5.1.x264-GRP
+ladder:hybrid	radarr	HD-Kino	Movie.Title.2023.Hybrid.1080p.BluRay.DDP5.1.x264-GRP
+ladder:hybrid	radarr	HD-Kino	Movie.Title.2023.1080p.BluRay.DDP5.1.x264-GRP
 
 # ── Radarr: release groups — Bluray tiers above WEB tiers above the rest ───
 ladder:tier	radarr	HD-Kino	Movie.Title.2023.1080p.BluRay.DDP5.1.x264-ATELiER
@@ -134,6 +136,10 @@ ladder:remaster	sonarr	HD	Show.Title.S01E01.Remastered.1080p.BluRay.DDP5.1.x264-
 ladder:remaster	sonarr	HD	Show.Title.S01E01.1080p.BluRay.DDP5.1.x264-GRP
 ladder:remaster	sonarr	UHD	Show.Title.S01E01.Remastered.2160p.BluRay.DDP5.1.HDR.x265-GRP
 ladder:remaster	sonarr	UHD	Show.Title.S01E01.2160p.BluRay.DDP5.1.HDR.x265-GRP
+ladder:hybrid	sonarr	HD	Show.Title.S01E01.Hybrid.1080p.BluRay.DDP5.1.x264-GRP
+ladder:hybrid	sonarr	HD	Show.Title.S01E01.1080p.BluRay.DDP5.1.x264-GRP
+ladder:hybrid	sonarr	UHD	Show.Title.S01E01.Hybrid.2160p.BluRay.DDP5.1.HDR.x265-GRP
+ladder:hybrid	sonarr	UHD	Show.Title.S01E01.2160p.BluRay.DDP5.1.HDR.x265-GRP
 
 # ── Sonarr: release groups ─────────────────────────────────────────────────
 ladder:tier	sonarr	HD	Show.Title.S01E01.1080p.WEB-DL.DDP5.1.H.264-ABBiE
@@ -147,6 +153,11 @@ block:score	sonarr	HD	Show.Title.S01E01.1080p.BluRay.Hybrid.TrueHD.7.1.Atmos.x26
 allow	sonarr	UHD	Show.Title.S01E01.2160p.WEB-DL.DDP5.1.Atmos.DV.HDR.10bit.H.265-BlackBit
 block:score	sonarr	UHD	Show.Title.S01E01.2160p.WEB-DL.DDP5.1.Atmos.HDR.10bit.H.265-BlackBit
 block:score	sonarr	HD	Show.Title.S01E01.1080p.WEB-DL.DDP5.1.H.264-4P
+block:score	sonarr	HD	Show.Title.S01.Extras.1080p.WEB-DL.DD5.1.H.264-GRP
+ladder:scene	sonarr	HD	Show.Title.S01E01.1080p.WEB-DL.DDP5.1.H.264-GRP
+ladder:scene	sonarr	HD	Show.Title.S01E01.1080p.WEB.DDP5.1.H264-GRP
+ladder:retag	sonarr	HD	Show.Title.S01E01.1080p.WEB-DL.DDP5.1.H.264-GRP
+ladder:retag	sonarr	HD	Show.Title.S01E01.1080p.WEB-DL.DDP5.1.H.264-GRP[rarbg]
 
 # ── Sonarr: LQ groups, penalized harder in UHD ─────────────────────────────
 block:score	sonarr	HD	Show.Title.S01E01.1080p.WEB-DL.DDP5.1.H.264-BTM
