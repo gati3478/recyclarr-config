@@ -32,6 +32,7 @@ block:score	radarr	UHD-Kino	Movie.Title.1999.2160p.UpScaled.WEB-DL.DDP5.1.H.265-
 block:score	radarr	HD-Kino	Frozen.2013.Sing-Along.1080p.BluRay.DD5.1.x264-GRP
 block:score	radarr	HD-Kino	Movie.Title.2023.1080p.WEB-DL.Line.Dubbed.x264-GRP
 block:score	radarr	HD-Kino	Movie.Title.1960.Black.and.White.1080p.BluRay.DD5.1.x264-GRP
+block:score	radarr	UHD-Kino	Movie.Title.2023.2160p.UHD.BluRay.DDP5.1.Atmos.DV.HDR10+.x265-BiTOR
 
 # ── Radarr: audio, flat across both profiles ───────────────────────────────
 ladder:audio	radarr	HD-Kino	Movie.Title.2023.1080p.BluRay.DDP5.1.Atmos.x264-GRP
@@ -58,15 +59,40 @@ ladder:cut	radarr	HD-Kino	Movie.Title.2023.Theatrical.Cut.1080p.BluRay.DDP5.1.x2
 ladder:repack	radarr	HD-Kino	Movie.Title.2023.REPACK2.1080p.BluRay.DDP5.1.x264-GRP
 ladder:repack	radarr	HD-Kino	Movie.Title.2023.REPACK.1080p.BluRay.DDP5.1.x264-GRP
 ladder:repack	radarr	HD-Kino	Movie.Title.2023.1080p.BluRay.DDP5.1.x264-GRP
+ladder:edition	radarr	HD-Kino	Movie.Title.1982.Special.Edition.1080p.BluRay.DDP5.1.x264-GRP
+ladder:edition	radarr	HD-Kino	Movie.Title.1982.1080p.BluRay.DDP5.1.x264-GRP
+ladder:hybrid	radarr	UHD-Kino	Movie.Title.2023.Hybrid.2160p.UHD.BluRay.DDP5.1.Atmos.DV.HDR.x265-GRP
+ladder:hybrid	radarr	UHD-Kino	Movie.Title.2023.2160p.UHD.BluRay.DDP5.1.Atmos.DV.HDR.x265-GRP
 
 # ── Radarr: release groups — Bluray tiers above WEB tiers above the rest ───
 ladder:tier	radarr	HD-Kino	Movie.Title.2023.1080p.BluRay.DDP5.1.x264-ATELiER
 ladder:tier	radarr	HD-Kino	Movie.Title.2023.1080p.WEB-DL.DDP5.1.H.264-ABBIE
 ladder:tier	radarr	HD-Kino	Movie.Title.2023.1080p.WEB-DL.DDP5.1.H.264-GRP
+ladder:uhdtier	radarr	UHD-Kino	Movie.Title.2023.2160p.UHD.BluRay.DDP5.1.Atmos.HDR.x265-CtrlHD
+ladder:uhdtier	radarr	UHD-Kino	Movie.Title.2023.2160p.UHD.BluRay.DDP5.1.Atmos.HDR.x265-HiDt
+ladder:uhdtier	radarr	UHD-Kino	Movie.Title.2023.2160p.UHD.BluRay.DDP5.1.Atmos.HDR.x265-hallowed
+ladder:uhdtier	radarr	UHD-Kino	Movie.Title.2023.2160p.UHD.BluRay.DDP5.1.Atmos.HDR.x265-GRP
+ladder:hdtier	radarr	UHD-Kino	Movie.Title.2023.1080p.BluRay.DDP5.1.x264-ATELiER
+ladder:hdtier	radarr	UHD-Kino	Movie.Title.2023.1080p.BluRay.DDP5.1.x264-EA
+ladder:hdtier	radarr	UHD-Kino	Movie.Title.2023.1080p.BluRay.DDP5.1.x264-BHDStudio
+ladder:hdtier	radarr	UHD-Kino	Movie.Title.2023.1080p.BluRay.DDP5.1.x264-GRP
 
 # ── Radarr: suspect releases, penalized alike in HD and UHD ────────────────
 block:score	radarr	HD-Kino	Movie.Title.2023.1080p.BluRay.Hybrid.TrueHD.7.1.Atmos.x264
 allow	radarr	UHD-Kino	Movie.Title.2023.2160p.WEB-DL.DDP5.1.Atmos.DV.HDR.10bit.H.265-BlackBit
+block:score	radarr	UHD-Kino	Movie.Title.2023.2160p.WEB-DL.DDP5.1.Atmos.HDR.10bit.H.265-BlackBit
+block:score	radarr	HD-Kino	Movie.Title.2023.1080p.BluRay.DDP5.1.x264-4P
+block:score	radarr	HD-Kino	Movie.Title.2023.Extras.1080p.BluRay.DD5.1.x264-GRP
+ladder:scene	radarr	HD-Kino	Movie.Title.2023.1080p.WEB-DL.DDP5.1.H.264-GRP
+ladder:scene	radarr	HD-Kino	Movie.Title.2023.1080p.WEB.DDP5.1.H264-GRP
+ladder:retag	radarr	HD-Kino	Movie.Title.2023.1080p.BluRay.DDP5.1.x264-GRP
+ladder:retag	radarr	HD-Kino	Movie.Title.2023.1080p.BluRay.DDP5.1.x264-GRP[rarbg]
+
+# ── Radarr: LQ groups, penalized harder in UHD ─────────────────────────────
+block:score	radarr	HD-Kino	Movie.Title.2023.1080p.BluRay.DDP5.1.x264-41RGB
+block:score	radarr	UHD-Kino	Movie.Title.2023.2160p.UHD.BluRay.DDP5.1.Atmos.DV.HDR.x265-4K4U
+allow	radarr	HD-Kino	Movie.Title.2023.IMAX.Open.Matte.Hybrid.1080p.BluRay.DDP5.1.Atmos.x264-41RGB
+block:score	radarr	UHD-Kino	Movie.Title.2023.IMAX.Open.Matte.Hybrid.1080p.BluRay.DDP5.1.Atmos.x264-41RGB
 
 # ── Radarr: HD x265 with no HDR gets in only with DD+ ──────────────────────
 block:score	radarr	HD-Kino	Movie.Title.2023.1080p.BluRay.DD5.1.x265-GRP
@@ -89,13 +115,27 @@ block:score	sonarr	UHD	Show.Title.S01.COMPLETE.UHD.BLURAY-GRP
 block:score	sonarr	HD	Show.Title.S01E01.1080p.UpScaled.WEB-DL.DDP5.1.H.264-GRP
 block:score	sonarr	HD	Show.Title.S01E01.Black.and.White.1080p.WEB-DL.DDP5.1.H.264-GRP
 
+# ── Sonarr: corrected releases ─────────────────────────────────────────────
+ladder:repack	sonarr	HD	Show.Title.S01E01.REPACK2.1080p.WEB-DL.DDP5.1.H.264-GRP
+ladder:repack	sonarr	HD	Show.Title.S01E01.REPACK.1080p.WEB-DL.DDP5.1.H.264-GRP
+ladder:repack	sonarr	HD	Show.Title.S01E01.1080p.WEB-DL.DDP5.1.H.264-GRP
+
 # ── Sonarr: release groups ─────────────────────────────────────────────────
 ladder:tier	sonarr	HD	Show.Title.S01E01.1080p.WEB-DL.DDP5.1.H.264-ABBiE
 ladder:tier	sonarr	HD	Show.Title.S01E01.1080p.WEB-DL.DDP5.1.H.264-GRP
+ladder:bdtier	sonarr	HD	Show.Title.S01E01.1080p.BluRay.DDP5.1.x264-Chotab
+ladder:bdtier	sonarr	HD	Show.Title.S01E01.1080p.BluRay.DDP5.1.x264-SA89
+ladder:bdtier	sonarr	HD	Show.Title.S01E01.1080p.BluRay.DDP5.1.x264-GRP
 
 # ── Sonarr: suspect releases, penalized as in Radarr ───────────────────────
 block:score	sonarr	HD	Show.Title.S01E01.1080p.BluRay.Hybrid.TrueHD.7.1.Atmos.x264
 allow	sonarr	UHD	Show.Title.S01E01.2160p.WEB-DL.DDP5.1.Atmos.DV.HDR.10bit.H.265-BlackBit
+block:score	sonarr	UHD	Show.Title.S01E01.2160p.WEB-DL.DDP5.1.Atmos.HDR.10bit.H.265-BlackBit
+block:score	sonarr	HD	Show.Title.S01E01.1080p.WEB-DL.DDP5.1.H.264-4P
+
+# ── Sonarr: LQ groups, penalized harder in UHD ─────────────────────────────
+block:score	sonarr	HD	Show.Title.S01E01.1080p.WEB-DL.DDP5.1.H.264-BTM
+block:score	sonarr	UHD	Show.Title.S01E01.2160p.WEB-DL.DDP5.1.Atmos.DV.HDR.H.265-BTM
 
 # ── Sonarr: HD x265 with no HDR gets in with DD or better ──────────────────
 block:score	sonarr	HD	Show.Title.S01E01.1080p.WEB-DL.AAC2.0.x265-GRP
