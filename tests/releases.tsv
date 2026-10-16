@@ -63,6 +63,12 @@ ladder:edition	radarr	HD-Kino	Movie.Title.1982.Special.Edition.1080p.BluRay.DDP5
 ladder:edition	radarr	HD-Kino	Movie.Title.1982.1080p.BluRay.DDP5.1.x264-GRP
 ladder:hybrid	radarr	UHD-Kino	Movie.Title.2023.Hybrid.2160p.UHD.BluRay.DDP5.1.Atmos.DV.HDR.x265-GRP
 ladder:hybrid	radarr	UHD-Kino	Movie.Title.2023.2160p.UHD.BluRay.DDP5.1.Atmos.DV.HDR.x265-GRP
+ladder:version	radarr	HD-Kino	Movie.Title.1982.IMAX.1080p.BluRay.DDP5.1.x264-GRP
+ladder:version	radarr	HD-Kino	Movie.Title.1982.Open.Matte.1080p.BluRay.DDP5.1.x264-GRP
+ladder:version	radarr	HD-Kino	Movie.Title.1982.Criterion.1080p.BluRay.DDP5.1.x264-GRP
+ladder:version	radarr	HD-Kino	Movie.Title.1982.4K.Remaster.1080p.BluRay.DDP5.1.x264-GRP
+ladder:version	radarr	HD-Kino	Movie.Title.1982.Remastered.1080p.BluRay.DDP5.1.x264-GRP
+ladder:version	radarr	HD-Kino	Movie.Title.1982.1080p.BluRay.DDP5.1.x264-GRP
 
 # ── Radarr: release groups — Bluray tiers above WEB tiers above the rest ───
 ladder:tier	radarr	HD-Kino	Movie.Title.2023.1080p.BluRay.DDP5.1.x264-ATELiER
@@ -114,11 +120,18 @@ block:quality	sonarr	UHD	Show.Title.S01E01.2160p.BluRay.REMUX.DV.HDR.HEVC.TrueHD
 block:score	sonarr	UHD	Show.Title.S01.COMPLETE.UHD.BLURAY-GRP
 block:score	sonarr	HD	Show.Title.S01E01.1080p.UpScaled.WEB-DL.DDP5.1.H.264-GRP
 block:score	sonarr	HD	Show.Title.S01E01.Black.and.White.1080p.WEB-DL.DDP5.1.H.264-GRP
+allow	sonarr	HD	Show.Title.S01E01.1080p.BluRay.DDP.5.1.H.265-EDGE2020
+allow	sonarr	HD	Show.Title.S01E01.1080p.BluRay.DDP5.1.H.264-GRP
+allow	sonarr	UHD	Show.Title.S01E01.2160p.BluRay.DDP5.1.HDR.H.265-GRP
 
-# ── Sonarr: corrected releases ─────────────────────────────────────────────
+# ── Sonarr: versions and corrected releases ────────────────────────────────
 ladder:repack	sonarr	HD	Show.Title.S01E01.REPACK2.1080p.WEB-DL.DDP5.1.H.264-GRP
 ladder:repack	sonarr	HD	Show.Title.S01E01.REPACK.1080p.WEB-DL.DDP5.1.H.264-GRP
 ladder:repack	sonarr	HD	Show.Title.S01E01.1080p.WEB-DL.DDP5.1.H.264-GRP
+ladder:remaster	sonarr	HD	Show.Title.S01E01.Remastered.1080p.BluRay.DDP5.1.x264-GRP
+ladder:remaster	sonarr	HD	Show.Title.S01E01.1080p.BluRay.DDP5.1.x264-GRP
+ladder:remaster	sonarr	UHD	Show.Title.S01E01.Remastered.2160p.BluRay.DDP5.1.HDR.x265-GRP
+ladder:remaster	sonarr	UHD	Show.Title.S01E01.2160p.BluRay.DDP5.1.HDR.x265-GRP
 
 # ── Sonarr: release groups ─────────────────────────────────────────────────
 ladder:tier	sonarr	HD	Show.Title.S01E01.1080p.WEB-DL.DDP5.1.H.264-ABBiE

@@ -9,6 +9,12 @@ radarr:
     quality_definition:
       type: movie
 
+    # Repacks and propers rank by the Repack/Proper formats below, as
+    # recyclarr's schema advises: "Set to 'do_not_prefer' when using Custom
+    # Formats for repack/proper handling."
+    media_management:
+      propers_and_repacks: do_not_prefer
+
     quality_profiles:
       # ============================================================
       # HD-Kino — 1080p cap, premium groups & audio
@@ -207,11 +213,15 @@ radarr:
           - name: UHD-Kino
             score: 150
 
+      # 4K Remaster matches only below 2160p: a 1080p encode of a 4K master,
+      # ranked above a plain remaster. A 2160p "4K Remaster" title gets no
+      # version bonus, since no guide format can score it (Remaster excludes
+      # "4K").
       - trash_ids:
           - eca37840c13c6ef2dd0262b141a5482f # 4K Remaster
         assign_scores_to:
           - name: HD-Kino
-            score: 25
+            score: 125
           - name: UHD-Kino
             score: 125
 
@@ -259,6 +269,9 @@ radarr:
           - name: UHD-Kino
             score: -10
 
+      # Under the minimum of 0, -2500 admits a release from these only when the
+      # rest of it sums to 2500 or more: a Bad Dual Groups UHD release with
+      # DD+ ATMOS, DV Boost, HDR and x265 gets in; the same without DV does not.
       - trash_ids:
           - b6832f586342ef70d9c128d40c07b872 # Bad Dual Groups
           - 7357cf5161efbf8c4d5d0c30b4815ee2 # Obfuscated
@@ -416,6 +429,12 @@ sonarr:
     quality_definition:
       type: series
 
+    # Repacks and propers rank by the Repack/Proper formats below, as
+    # recyclarr's schema advises: "Set to 'do_not_prefer' when using Custom
+    # Formats for repack/proper handling."
+    media_management:
+      propers_and_repacks: do_not_prefer
+
     quality_profiles:
       # ============================================================
       # HD — 1080p cap, balanced quality/size
@@ -466,9 +485,11 @@ sonarr:
           - name: WEB 720p
             qualities: [WEBDL-720p, WEBRip-720p]
 
-    # As under Radarr, plus two members the guide leaves off by default: BW,
-    # matching Radarr's black-and-white block, and BR-DISK (BTN), the disc
-    # images this setup never takes.
+    # As under Radarr, plus BW, which the guide leaves off by default, to match
+    # Radarr's black-and-white block. BR-DISK (BTN) stays off: it reads H.264
+    # and H.265 as a disc codec, so it would block every Blu-ray encode named
+    # that way. The standard BR-DISK already blocks disc titles, and no indexer
+    # here is BTN.
     custom_format_groups:
       add:
         - trash_id: 59c3af66780d08332fdc64e68297098f # [Unwanted] Unwanted Formats
@@ -477,7 +498,6 @@ sonarr:
             - name: UHD
           select:
             - 21d9d08e39b05523ec36811ab06b8308 # BW
-            - 6f808933a71bd9666531610cb8c059cc # BR-DISK (BTN)
 
     custom_formats:
       # ============================================================
@@ -579,7 +599,7 @@ sonarr:
             score: 50
 
       # ============================================================
-      # HYBRID (mixed-source releases)
+      # VERSIONS (Hybrid, Remaster)
       # ============================================================
       - trash_ids:
           - 3a4127d8aa781b44120d907f2cd62627 # Hybrid
@@ -588,6 +608,14 @@ sonarr:
             score: 100
           - name: UHD
             score: 500
+
+      - trash_ids:
+          - b735f09d3c025cbb7d75a5d38325b73b # Remaster
+        assign_scores_to:
+          - name: HD
+            score: 100
+          - name: UHD
+            score: 50
 
       # ============================================================
       # RELEASE PENALTIES (all profiles)
@@ -617,6 +645,9 @@ sonarr:
           - name: UHD
             score: -10
 
+      # Under the minimum of 0, -2500 admits a release from these only when the
+      # rest of it sums to 2500 or more: a Bad Dual Groups UHD release with
+      # DD+ ATMOS, DV Boost, HDR and x265 gets in; the same without DV does not.
       - trash_ids:
           - 32b367365729d530ca1c124a0b180c64 # Bad Dual Groups
           - e1a997ddb54e3ecbfe06341ad323c458 # Obfuscated
