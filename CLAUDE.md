@@ -27,10 +27,10 @@ Recyclarr is not installed on this machine, and `sync` reaches Radarr and Sonarr
 ```
 ~/Development/plumage/hosts/whatbox/bin/whatbox-apply   # deploys the edited file, re-checks
 ssh -tt whatbox '~/bin/recyclarr sync --preview'        # the parse and the diff, against today's guide
-ssh whatbox '~/bin/recyclarr-sync; cat ~/.local/state/recyclarr/last'   # the sync and its verdict, or wait for cron: Monday 04:00 UTC
+ssh whatbox '~/bin/recyclarr-sync; tail -n 20 ~/.local/state/recyclarr/sync.log'   # the sync and its log, or wait for cron: Monday 04:00 UTC
 ```
 
-`--preview` exits 0 on a config parse error — read its output, not its exit code. Its diff renders only to a PTY, which `-tt` forces even when stdin is not a terminal, as in a Claude Code session (one `-t` does not); without a PTY it prints log lines and no diff, which reads as clean. Sync through `recyclarr-sync`, cron's wrapper: it skips the run when an *arr is down and writes a one-line verdict to `~/.local/state/recyclarr/last`, which `boxstat` reads. It prints nothing itself, and a bare `recyclarr sync` leaves that verdict showing the last wrapper run. The binary is `~/bin/recyclarr`, pinned by a row in plumage `hosts/whatbox/promises.tsv`; upgrading it is plumage `docs/maintenance.md` § "Bump a Whatbox binary". A Docker form of the preview used to live here; retired 09-09-2026 — it validated parsing only, needed a dummy `secrets.yml` mounted to parse at all, and the `latest` tag it named no longer exists.
+`--preview` exits 0 on a config parse error — read its output, not its exit code. Its diff renders only to a PTY, which `-tt` forces even when stdin is not a terminal, as in a Claude Code session (one `-t` does not); without a PTY it prints log lines and no diff, which reads as clean. Sync through `recyclarr-sync`, cron's wrapper: it skips the run when an *arr is down and writes a one-line verdict to `~/.local/state/recyclarr/last`, which `boxstat` reads. It prints nothing itself, and a bare `recyclarr sync` leaves that verdict showing the last wrapper run. Read the log rather than the verdict's `changed-lines`: it also counts the "did not change" lines, so 2 is its floor — left that way by a decision recorded in the vault's Whatbox note. The binary is `~/bin/recyclarr`, pinned by a row in plumage `hosts/whatbox/promises.tsv`; upgrading it is plumage `docs/maintenance.md` § "Bump a Whatbox binary". A Docker form of the preview used to live here; retired 09-09-2026 — it validated parsing only, needed a dummy `secrets.yml` mounted to parse at all, and the `latest` tag it named no longer exists.
 
 No other commands exist. There are no tests, no linting, no build steps.
 
@@ -95,7 +95,7 @@ Audio scores are intentionally flat across HD and UHD — the Beam 2 doesn't car
 
 TrueHD is scored positively despite Beam 2 incompatibility because releases with TrueHD usually include a DD/AC3 fallback track.
 
-HDR hierarchy (UHD profiles only): generic HDR (+50) stacks with DV Boost (+1000) and HDR10+ Boost (+100) to give DV+fallback ~+1050 > HDR10+ ~+150 > HDR10 +50 > SDR 0. DV without HDR10 fallback is blocked hard (-10000) regardless.
+HDR hierarchy (UHD profiles only): generic HDR (+50) stacks with DV Boost (+1000) and HDR10+ Boost (+100) to give DV+fallback ~+1050 > HDR10+ ~+150 > HDR10 +50 > SDR 0. DV without HDR10 fallback is blocked hard (-10000) regardless, and in the HD profiles too: the fallback requirement does not depend on resolution.
 
 ## Editing Guidelines
 
