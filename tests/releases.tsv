@@ -9,8 +9,10 @@
 #                  strictly lower in the order listed — best first
 # Each block kind checks one reason, so a title blocked both ways takes a row
 # of each. Whatever its kind, a row fails when its quality parses to nothing or
-# to Unknown, when its title names no resolution (480p to 2160p, 4K or UHD; the
-# parser would fall back to a default quality), or when it is a one-row ladder.
+# to Unknown, when its title names no resolution as 480p, 576p, 720p, 1080p,
+# 2160p (or the i forms) or UHD, or when it is a one-row ladder. Without a
+# resolution the parser falls back to a quality picked by source; a bare 4K
+# counts as none.
 # Titles are realistic shapes, not real releases; most vary one feature from a
 # plain release.
 

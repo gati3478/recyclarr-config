@@ -40,7 +40,7 @@ One profile per resolution on each side — two Radarr profiles for movies, two 
 
 **Release Groups**
 
-- TRaSH HQ tier formats (HD/UHD Bluray tiers, WEB tiers) applied in both services wherever the guide publishes them (Sonarr has no UHD Bluray tiers and no HD Bluray Tier 03), scaled from TRaSH's 1600–1800 defaults down to +75…+200 — group quality breaks ties but never outvotes audio/HDR scoring
+- TRaSH's HQ tier formats for HD Bluray, UHD Bluray and WEB, applied in both services wherever the guide publishes them (Sonarr has no UHD Bluray tiers and no HD Bluray Tier 03) and scaled from TRaSH's 1600–1800 defaults down to +75…+200 — group quality breaks ties but never outvotes audio/HDR scoring. The guide's Remux, anime, Asian, French and German tiers are not used
 
 **Versions**
 

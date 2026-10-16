@@ -24,9 +24,11 @@ ALLOW = "allow"
 KINDS = {BLOCK_SCORE, BLOCK_QUALITY, ALLOW}
 LADDER = "ladder:"
 UNPARSED = {None, "Unknown"}   # an unreadable title: no parsed info, or a quality of Unknown
-# A title naming no resolution still parses, to a fallback (SDTV, WEBDL-480p)
-# indistinguishable from the real quality, so the title must name one.
-RESOLUTION = re.compile(r"(?i)(?:^|[._ -])(?:(?:480|576|720|1080|2160)[pi]|4k|uhd)(?:$|[._ -])")
+# A title naming no resolution still parses, to a fallback picked by its source
+# (WEB-DL reads as WEBDL-480p, BluRay as Bluray-720p, HDTV as SDTV) that looks
+# like a real quality, so the title must name one. A bare 4K names none: both
+# parsers fall back on it.
+RESOLUTION = re.compile(r"(?i)(?:^|[._ ()\[\]-])(?:(?:480|576|720|1080|2160)[pi]|uhd)(?:$|[._ ()\[\]-])")
 
 
 def read_secrets():
@@ -121,7 +123,7 @@ def main(tsv):
         if quality in UNPARSED:
             faults.append("no quality parsed")
         if not RESOLUTION.search(title):
-            faults.append("the title names no resolution, so its quality is the parser's fallback")
+            faults.append("the title names no resolution releases.tsv's header lists, so its quality may be the parser's fallback")
         if kind.startswith(LADDER) and rungs[(kind, service, profile)] < 2:
             faults.append("a one-row ladder compares nothing")
         why = ""

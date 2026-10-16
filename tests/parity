@@ -58,7 +58,7 @@ def comments(text):
 
 def read(path):
     """Per service: every trash_id the file holds, and each custom_formats
-    entry as (its trash_ids, {profile: score})."""
+    entry as (its trash_ids, [(profile, score)]), a repeated profile kept."""
     text = path.read_text()
     doc = yaml.load(text, Loader=SecretLoader)
     ids, entries = {}, {}
@@ -68,7 +68,7 @@ def read(path):
             for group in (instance.get("custom_format_groups") or {}).get("add") or []:
                 ids[service] += [group["trash_id"], *(group.get("select") or []), *(group.get("exclude") or [])]
             for cf in instance.get("custom_formats") or []:
-                scores = {a["name"]: a.get("score") for a in cf["assign_scores_to"]}
+                scores = [(a["name"], a.get("score")) for a in cf["assign_scores_to"]]
                 ids[service] += cf["trash_ids"]
                 entries[service].append((cf["trash_ids"], scores))
     return comments(text), ids, entries
@@ -85,8 +85,8 @@ def check(named, ids, entries):
     scores = {service: {} for service in PAIRS}   # service -> name -> {pair: score}
     misfits = set()
     for service, pairs in PAIRS.items():
-        for trash_ids, by_profile in entries[service]:
-            for profile, score in by_profile.items():
+        for trash_ids, assigned in entries[service]:
+            for profile, score in assigned:
                 if profile not in pairs:
                     misfits.add(f"{service} profile {profile} pairs with no profile in the other service")
                     continue

@@ -11,5 +11,11 @@ table="${1:-$here/releases.tsv}"
 [ -r "$table" ] && [ ! -d "$table" ] || { echo "tests/scores: cannot read $table" >&2; exit 2; }
 # The table travels inside the program as a string literal: JSON's string
 # syntax is valid Python, and nothing is written on the box.
-data="$(python3 -I -c 'import json, sys; print(json.dumps(open(sys.argv[1]).read()))' "$table")"
+data="$(python3 -I -c '
+import json, sys
+try:
+    print(json.dumps(open(sys.argv[1], encoding="utf-8").read()))
+except UnicodeDecodeError as e:
+    print(f"tests/scores: cannot read {sys.argv[1]}: {e}", file=sys.stderr)
+    sys.exit(2)' "$table")"
 { cat "$here/scores.py"; printf '\nmain(%s)\n' "$data"; } | ssh whatbox python3 -
