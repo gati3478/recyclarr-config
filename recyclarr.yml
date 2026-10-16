@@ -2,7 +2,7 @@
 
 radarr:
   whatbox-radarr:
-    base_url: http://localhost:RADARR_PORT
+    base_url: !secret radarr_url
     api_key: !secret radarr_api_key
 
     # TRaSH quality-definition (global min/max sizes per quality).
@@ -58,6 +58,18 @@ radarr:
           - name: Bluray-720p
           - name: WEB 720p
             qualities: [WEBDL-720p, WEBRip-720p]
+
+    # The guide's Unwanted formats, adopted whole at its -10000, so a format
+    # the guide adds later arrives blocked rather than at 0. An entry under
+    # custom_formats overrides a member per profile; a decline goes under
+    # `exclude:` with its reason. AV1 is a member: Plex on the C1 always
+    # transcodes it, and nothing here can.
+    custom_format_groups:
+      add:
+        - trash_id: a3ac6af01d78e4f21fcb75f601ac96df # [Unwanted] Unwanted Formats
+          assign_scores_to:
+            - name: HD-Kino
+            - name: UHD-Kino
 
     custom_formats:
       # ============================================================
@@ -123,21 +135,14 @@ radarr:
       # ============================================================
       # HDR / DOLBY VISION (UHD profile only, except the fallback block)
       # ============================================================
-      # Hard block DV without HDR fallback in every profile — the C1 and Plex
-      # on webOS need the fallback at 1080p as at 2160p.
+      # Hard block DV without HDR fallback in every profile: Plex on the C1
+      # plays profile 5 only from MP4, and from MKV — nearly every release —
+      # it shifts magenta.
       - trash_ids:
           - 923b6abef9b17f937fab56cfcf89e1f1 # DV (w/o HDR fallback)
         assign_scores_to:
           - name: HD-Kino
             score: -10000
-          - name: UHD-Kino
-            score: -10000
-
-      # DV/HDR10+ metadata generated, not mastered, by the groups the guide
-      # lists — blocked at the guide's -10000, not merely denied DV Boost.
-      - trash_ids:
-          - e6886871085226c3da1830830146846c # Generated Dynamic HDR
-        assign_scores_to:
           - name: UHD-Kino
             score: -10000
 
@@ -233,19 +238,6 @@ radarr:
           - 3a3ff47579026e76d6504ebea39390de # Remux Tier 01
           - 9f98181fe5a3fbeb0cc29340da2a468a # Remux Tier 02
           - 8baaf0b3142bf4d94c42a724f034e27a # Remux Tier 03
-          - ed38b889b31be83fda192888e2286d83 # BR-DISK
-        assign_scores_to:
-          - name: HD-Kino
-            score: -10000
-          - name: UHD-Kino
-            score: -10000
-
-      # 3D encodes, releases tagged as upscales or regrades, and AV1, whose
-      # Direct Play on Plex webOS is unverified — nothing here transcodes.
-      - trash_ids:
-          - b8cd450cbfa689c0259a01d9e29ba3d6 # 3D
-          - bfd8eb01832d646a0a89c4deb46f8564 # Upscaled
-          - cae4ca30163749b891686f95532519bd # AV1
         assign_scores_to:
           - name: HD-Kino
             score: -10000
@@ -427,7 +419,7 @@ radarr:
 
 sonarr:
   whatbox-sonarr:
-    base_url: http://localhost:SONARR_PORT
+    base_url: !secret sonarr_url
     api_key: !secret sonarr_api_key
 
     # TRaSH quality-definition (global min/max sizes per quality).
@@ -483,6 +475,19 @@ sonarr:
           - name: Bluray-720p
           - name: WEB 720p
             qualities: [WEBDL-720p, WEBRip-720p]
+
+    # As under Radarr, plus two members the guide leaves off by default: BW,
+    # matching Radarr's black-and-white block, and BR-DISK (BTN), the disc
+    # images this setup never takes.
+    custom_format_groups:
+      add:
+        - trash_id: 59c3af66780d08332fdc64e68297098f # [Unwanted] Unwanted Formats
+          assign_scores_to:
+            - name: HD
+            - name: UHD
+          select:
+            - 21d9d08e39b05523ec36811ab06b8308 # BW
+            - 6f808933a71bd9666531610cb8c059cc # BR-DISK (BTN)
 
     custom_formats:
       # ============================================================
@@ -548,8 +553,9 @@ sonarr:
       # ============================================================
       # HDR / DOLBY VISION (UHD profile only, except the fallback block)
       # ============================================================
-      # Hard block DV without HDR fallback in every profile — the C1 and Plex
-      # on webOS need the fallback at 1080p as at 2160p.
+      # Hard block DV without HDR fallback in every profile: Plex on the C1
+      # plays profile 5 only from MP4, and from MKV — nearly every release —
+      # it shifts magenta.
       - trash_ids:
           - 9b27ab6498ec0f31a3353992e19434ca # DV (w/o HDR fallback)
         assign_scores_to:
@@ -599,18 +605,6 @@ sonarr:
       - trash_ids:
           - 9965a052eb87b0d10313b1cea89eb451 # Remux Tier 01
           - 8a1d0c3d7497e741736761a1da866a2e # Remux Tier 02
-          - 85c61753df5da1fb2aab6f2a47426b09 # BR-DISK
-        assign_scores_to:
-          - name: HD
-            score: -10000
-          - name: UHD
-            score: -10000
-
-      # Releases tagged as upscales or regrades, and AV1, whose Direct Play on
-      # Plex webOS is unverified — nothing here transcodes.
-      - trash_ids:
-          - 23297a736ca77c0fc8e70f8edd7ee56c # Upscaled
-          - 15a05bc7c1a36e2b57fd628f8977e2fc # AV1
         assign_scores_to:
           - name: HD
             score: -10000

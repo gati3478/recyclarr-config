@@ -1,0 +1,23 @@
+#!/bin/sh
+# Refuses a commit whose recyclarr.yml names a URL or key in the clear: this
+# repo is public, and the box resolves both from its secrets.yml through
+# !secret. Checks the INDEX, not the worktree; given a path, checks that file
+# instead, which is how plumage's doctor reads the working copy. Reports line
+# numbers only, so a refused key is never echoed into a terminal log.
+# Enable once per clone:  git config core.hooksPath .githooks
+if [ $# -gt 0 ] && [ ! -r "$1" ]; then
+  echo "pre-commit: cannot read $1" >&2; exit 2
+fi
+if [ $# -gt 0 ]; then
+  cat -- "$1"
+else
+  git show :recyclarr.yml 2>/dev/null   # not staged at all: nothing to publish
+fi | awk '
+  /^[[:space:]]*(base_url|api_key):/ && !/:[[:space:]]*!secret[[:space:]]+[[:alnum:]_]+[[:space:]]*$/ {
+    print "recyclarr.yml:" NR ": a base_url or api_key that is not a !secret reference"; bad = 1
+  }
+  /:\/\// && !/^# yaml-language-server: \$schema=/ {
+    print "recyclarr.yml:" NR ": a URL"; bad = 1
+  }
+  END { exit bad }
+' >&2

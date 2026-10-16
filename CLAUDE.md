@@ -4,25 +4,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This Is
 
-Recyclarr configuration for a Direct Play-only Plex setup on a Whatbox seedbox. No source code, no build system — just YAML configs that `recyclarr sync` pushes to Radarr and Sonarr.
+Recyclarr configuration for a Direct Play-only Plex setup on a Whatbox seedbox. No source code, no build system — one YAML file that `recyclarr sync` pushes to Radarr and Sonarr.
 
 ## Files
 
-- `recyclarr.yml` — the live config with the real ports, **a symlink** into the plumage repo: `../plumage/hosts/whatbox/files/recyclarr/recyclarr.yml`, the copy that repo deploys to the box and versions. One file with two names since 09-09-2026: an edit here is the deploy source at once, and `whatbox-pull` writes the box's version back into it. Gitignored here — this repo is public and the ports are the seedbox's — so a fresh clone has no `recyclarr.yml` until the link is made:
+- `recyclarr.yml` — the live config, versioned here. It names no port and no key: `base_url` and `api_key` are `!secret radarr_url` / `!secret radarr_api_key` and the Sonarr pair, resolved on the box from `~/.config/recyclarr/secrets.yml`, which exists only there. plumage deploys it through a link — `~/Development/plumage/hosts/whatbox/files/recyclarr/recyclarr.yml` → `../../../../../recyclarr/recyclarr.yml` — so a plumage clone needs this repo cloned beside it.
+- `README.md` — the public design write-up.
+- `.githooks/pre-commit` — the publishing guard (below).
 
-  ```
-  ln -s ../plumage/hosts/whatbox/files/recyclarr/recyclarr.yml recyclarr.yml
-  ```
-
-  It carries **no credential**: the two `api_key` lines are `!secret radarr_api_key` / `!secret sonarr_api_key`, resolved on the box from `~/.config/recyclarr/secrets.yml`, which exists only there. ⚠️ Claude Code's Edit tool refuses to write through a symlink — in a session, edit `~/Development/plumage/hosts/whatbox/files/recyclarr/recyclarr.yml`; every other editor follows the link.
-
-- `recyclarr-template.yml` — the shareable version, identical except for two placeholders (`RADARR_PORT`, `SONARR_PORT`)
-
-Both files carry a `yaml-language-server` schema header pointing at recyclarr's config schema, so schema-aware editors validate structure on save.
+The file carries a `yaml-language-server` schema header, so schema-aware editors validate it on save.
 
 ## Syncing and deploying
 
-Recyclarr is not installed on this machine, and `sync` reaches Radarr and Sonarr only from the box, so the deploy goes through the plumage repo — which governs the box's copy at `~/.config/recyclarr/recyclarr.yml` as a manifest row — and every check runs on the box. **Never `scp` straight onto the box**: `preen doctor` would report drift, and `whatbox-apply` would put the governed copy back.
+Recyclarr is not installed on this machine, and `sync` reaches Radarr and Sonarr only from the box, so every deploy goes through plumage and every check runs on the box:
 
 ```
 ~/Development/plumage/hosts/whatbox/bin/whatbox-apply   # deploys the edited file, re-checks
@@ -30,34 +24,26 @@ ssh -tt whatbox '~/bin/recyclarr sync --preview'        # the parse and the diff
 ssh whatbox '~/bin/recyclarr-sync; tail -n 20 ~/.local/state/recyclarr/sync.log'   # the sync and its log, or wait for cron: Monday 04:00 UTC
 ```
 
-`--preview` exits 0 on a config parse error — read its output, not its exit code. Its diff renders only to a PTY, which `-tt` forces even when stdin is not a terminal, as in a Claude Code session (one `-t` does not); without a PTY it prints log lines and no diff, which reads as clean. Sync through `recyclarr-sync`, cron's wrapper: it skips the run when an *arr is down and writes a one-line verdict to `~/.local/state/recyclarr/last`, which `boxstat` reads. It prints nothing itself, and a bare `recyclarr sync` leaves that verdict showing the last wrapper run. Read the log rather than the verdict's `changed-lines`: it also counts the "did not change" lines, so 2 is its floor — left that way by a decision recorded in the vault's Whatbox note. The binary is `~/bin/recyclarr`, pinned by a row in plumage `hosts/whatbox/promises.tsv`; upgrading it is plumage `docs/maintenance.md` § "Bump a Whatbox binary". A Docker form of the preview used to live here; retired 09-09-2026 — it validated parsing only, needed a dummy `secrets.yml` mounted to parse at all, and the `latest` tag it named no longer exists.
+- **Never `scp` straight onto the box**: `preen doctor` reports the drift, and `whatbox-apply` puts the governed copy back.
+- **The preview needs a PTY.** Its diff renders only to a terminal; `-tt` forces one even when stdin is not a terminal, as in a Claude Code session (one `-t` does not). Without it the preview prints log lines and no diff, which reads as clean. It also exits 0 on a parse error — read its output.
+- **Sync through `recyclarr-sync`**, cron's wrapper: it skips the run when an *arr is down and writes a one-line verdict to `~/.local/state/recyclarr/last`, which `boxstat` reads. It prints nothing itself. Read the log rather than the verdict's `changed-lines`: it also counts the "did not change" lines, so 2 is its floor — left that way by a decision recorded in the vault's Whatbox note.
+- **A box-side edit is never pulled back**: `whatbox-pull` reports this row as `LINKED` and writes nothing. Carry the change here by hand.
+- **The binary** is `~/bin/recyclarr`, pinned by a row in plumage `hosts/whatbox/promises.tsv`; upgrading it is plumage `docs/maintenance.md` § "Bump a Whatbox binary".
 
-No other commands exist. There are no tests, no linting, no build steps.
+No other commands exist. Beyond the publishing guard there are no tests, no linting, no build steps, and no local validation — the preview on the box is the validator.
 
-## Template parity (doctor-asserted)
+## Publishing safety
 
-`recyclarr.yml` and `recyclarr-template.yml` must stay identical except for the two `base_url` lines:
-
-```
-diff recyclarr.yml recyclarr-template.yml    # exactly 2 differing lines, both base_url
-```
-
-`preen doctor` (plumage) asserts this on every run, and that `recyclarr.yml` here is the link. Edit `recyclarr.yml` first, then regenerate the template from it — never hand-edit the template into drift:
-
-```
-awk '/^radarr:/{s="RADARR"} /^sonarr:/{s="SONARR"} {sub(/localhost:[0-9]+/, "localhost:" s "_PORT"); print}' recyclarr.yml > recyclarr-template.yml
-```
-
-(A PostToolUse hook used to claim this job. It was scoped to a mistyped path and never fired, and its rule of four differing lines had been two since the `!secret` split; retired 09-09-2026.)
+This repo is public, so the file must never name the box's ports or keys. `.githooks/pre-commit` refuses a commit whose staged `recyclarr.yml` has a `base_url` or `api_key` that is not a `!secret` reference, or any URL besides the schema header; it names line numbers only, never the value. It runs once the clone has `git config core.hooksPath .githooks`. `preen doctor` (plumage) runs the same hook on the working copy, and warns when that config is missing or plumage's row stops linking here. A new value goes into the box's `secrets.yml` — edited there, never in git — and the YAML references it with `!secret`.
 
 ## Hardware Constraints (These Drive All Scoring Decisions)
 
 - **No transcoding**: Whatbox seedbox, Plex must Direct Play everything
 - **No DTS**: Sonos Beam 2 cannot decode DTS; Plex can't transcode audio either. All DTS formats get `-10000`
 - **No HDR10+**: LG C1 doesn't support it. HDR10+ Boost gets only `+100` (non-zero to act as tiebreaker, not a priority)
-- **Dolby Vision needs HDR10 fallback**: DV without fallback gets `-10000` (C1 + Plex webOS requirement)
+- **Dolby Vision needs HDR10 fallback**: Plex on the C1 plays DV profile 5, which has none, only from MP4; from MKV — nearly every release — it shifts magenta. DV without fallback gets `-10000` in every profile
 - **No Remux/BR-DISK**: Too large for seedbox storage, and Direct Play makes raw disc pointless
-- **No AV1**: Direct Play of AV1 on Plex webOS is unverified for the C1, so it gets `-10000` until proven
+- **No AV1**: Plex on the C1 always transcodes AV1, which the box cannot do. Blocked at `-10000` through the Unwanted group
 
 ## Profile Architecture
 
@@ -70,15 +56,15 @@ Two profiles per service, one per resolution tier:
 | Sonarr  | HD       | Bluray-1080p  | per-episode   |
 | Sonarr  | UHD      | Bluray-2160p  | per-episode   |
 
-**There is no TRaSH baseline anywhere.** Neither service uses `score_set` or guide-profile `trash_id`s — the explicit `custom_formats` blocks are the entire scoring model, and every score a release can receive is visible in the YAML. (Recyclarr's `score_set` only selects which preset score applies to CFs listed _without_ an explicit `score:`; it never pulls formats in by itself. An earlier revision of this config carried inert `score_set: sqp-1-*` lines under that misunderstanding — they were removed as a no-op.)
+**One guide group, otherwise no TRaSH baseline.** Neither service uses `score_set` or guide-profile `trash_id`s. The one import is the guide's `[Unwanted] Unwanted Formats` group (`custom_format_groups`), adopted whole at its `-10000` so a format the guide adds later arrives blocked rather than at 0. Its members are listed in the guide JSON (`docs/json/{radarr,sonarr}/cf-groups/unwanted-formats.json`), not here. An entry under `custom_formats` overrides a member per profile — LQ, LQ (Release Title), Bad Dual Groups and Extras carry their own scores — and a decline goes under the group's `exclude:` with its reason. Sonarr also `select`s two members the guide leaves off by default, BW and BR-DISK (BTN). Every other score is explicit in the YAML. (Recyclarr's `score_set` only picks which preset score applies to a CF listed _without_ an explicit `score:`; it never pulls formats in by itself.)
 
 HQ release-group scoring therefore comes from explicitly listed tier CFs in both services — Radarr: `HD Bluray Tier 01–03`, `UHD Bluray Tier 01–03`, `WEB Tier 01–03`; Sonarr: `HD Bluray Tier 01–02`, `WEB Tier 01–03` (TRaSH publishes no Sonarr UHD Bluray tiers). HD Bluray tiers are also assigned to the UHD profiles, which fall back to Bluray-1080p when no 2160p release exists.
 
-All profiles use `reset_unmatched_scores: true`, so any format score not explicitly assigned by this config gets zeroed in the *arr instance.
+All profiles use `reset_unmatched_scores: true`, so any format score this config assigns neither explicitly nor through the group gets zeroed in the *arr instance.
 
 ## Scoring Conventions
 
-- `-10000` = hard block (DTS, Remux, BR-DISK, DV without fallback, 3D, Upscaled, AV1, Generated Dynamic HDR)
+- `-10000` = hard block (DTS, Remux, DV without fallback, and every Unwanted-group member without an explicit score — BR-DISK, 3D, Upscaled, AV1 and Generated Dynamic HDR among them)
 - `-2500` to `-4500` = strong penalty (LQ, Bad Dual Groups, Obfuscated, Extras)
 - `-10` to `-1000` = soft penalty (Retags, Scene, Theatrical Cut, x265 without HDR, LQ (Release Title), No-RlsGroup)
 - `+5` to `+7` = tiebreakers (Repack/Proper, Repack2, Repack3 — grab the corrected release when otherwise equal)
@@ -100,6 +86,5 @@ HDR hierarchy (UHD profiles only): generic HDR (+50) stacks with DV Boost (+1000
 ## Editing Guidelines
 
 - Radarr and Sonarr use **different `trash_ids`** for the same format name. Never copy a trash_id between the radarr and sonarr sections.
-- Change `recyclarr.yml` first, then regenerate `recyclarr-template.yml` from it with the `awk` line under Template parity. The doctor warns until they match.
-- Every `trash_id` entry has an inline comment with the format's exact guide name (e.g., `# DTS-HD MA`). Keep comments verbatim-identical to the TRaSH guide `name` field so they can be verified mechanically against the guide JSON (`docs/json/{radarr,sonarr}/cf/*.json` in the TRaSH-Guides repo).
+- Every `trash_id` entry — CF or CF group — has an inline comment with its exact guide name (e.g., `# DTS-HD MA`). Keep comments verbatim-identical to the TRaSH guide `name` field so they can be verified mechanically against the guide JSON (`docs/json/{radarr,sonarr}/{cf,cf-groups}/*.json` in the TRaSH-Guides repo).
 - Scores assigned to profiles within the same `assign_scores_to` block typically share the same value across profiles unless there's a specific reason to differ (e.g., LQ is `-2500` for HD but `-4500` for UHD — UHD junk costs more disk and lives longer, so it's penalized harder).
