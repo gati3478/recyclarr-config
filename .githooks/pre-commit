@@ -1,23 +1,47 @@
 #!/bin/sh
-# Refuses a commit whose recyclarr.yml names a URL or key in the clear: this
-# repo is public, and the box resolves both from its secrets.yml through
-# !secret. Checks the INDEX, not the worktree; given a path, checks that file
-# instead, which is how plumage's doctor reads the working copy. Reports line
-# numbers only, so a refused key is never echoed into a terminal log.
+# Refuses a commit that would publish the box's addresses or keys: this repo
+# is public, and the box resolves both from its secrets.yml through !secret.
+# Every staged file is checked for a host with a port — loopback, an IP, or
+# whatbox.ca; a staged YAML file also for a base_url or api_key that is not a
+# !secret reference, and for a URL outside a comment. Checks the INDEX, not
+# the worktree; given paths, checks those files instead, which is how
+# plumage's doctor reads the working copy. Names line numbers, never values.
 # Enable once per clone:  git config core.hooksPath .githooks
-if [ $# -gt 0 ] && [ ! -r "$1" ]; then
-  echo "pre-commit: cannot read $1" >&2; exit 2
-fi
+
+check() {   # check <name>, the file's bytes on stdin
+  awk -v f="$1" '
+    BEGIN {
+      key = "(base_url|api_key)[\"\047]?[[:space:]]*:"
+      yaml = f ~ /\.ya?ml$/
+    }
+    /(localhost|\[::1\]|[0-9]{1,3}(\.[0-9]{1,3}){3}|whatbox\.ca):[0-9]+/ {
+      print f ":" NR ": a host with a port"; bad = 1
+    }
+    !yaml || /^[[:space:]]*#/ { next }
+    {
+      line = $0
+      sub(/[[:space:]]#.*$/, "", line)   # an inline comment is not a value
+      if (match(line, key) && substr(line, RSTART + RLENGTH) !~ /^[[:space:]]*!secret[[:space:]]+[[:alnum:]_]+/) {
+        print f ":" NR ": a base_url or api_key that is not a !secret reference"; bad = 1
+      }
+      if (line ~ /:\/\//) {
+        print f ":" NR ": a URL"; bad = 1
+      }
+    }
+    END { exit bad }
+  ' >&2
+}
+
 if [ $# -gt 0 ]; then
-  cat -- "$1"
-else
-  git show :recyclarr.yml 2>/dev/null   # not staged at all: nothing to publish
-fi | awk '
-  /^[[:space:]]*(base_url|api_key):/ && !/:[[:space:]]*!secret[[:space:]]+[[:alnum:]_]+[[:space:]]*$/ {
-    print "recyclarr.yml:" NR ": a base_url or api_key that is not a !secret reference"; bad = 1
-  }
-  /:\/\// && !/^# yaml-language-server: \$schema=/ {
-    print "recyclarr.yml:" NR ": a URL"; bad = 1
-  }
-  END { exit bad }
-' >&2
+  status=0
+  for p in "$@"; do
+    [ -r "$p" ] || { echo "pre-commit: cannot read $p" >&2; exit 2; }
+    check "${p##*/}" < "$p" || status=1
+  done
+  exit "$status"
+fi
+
+failed="$(git diff --cached --name-only --diff-filter=ACMR | while IFS= read -r f; do
+  git show ":$f" | check "$f" || echo "$f"
+done)"
+[ -z "$failed" ] || { echo "pre-commit: refused — move the value into the box's secrets.yml and reference it with !secret" >&2; exit 1; }

@@ -34,7 +34,7 @@ No other commands exist. Beyond the publishing guard there are no tests, no lint
 
 ## Publishing safety
 
-This repo is public, so the file must never name the box's ports or keys. `.githooks/pre-commit` refuses a commit whose staged `recyclarr.yml` has a `base_url` or `api_key` that is not a `!secret` reference, or any URL besides the schema header; it names line numbers only, never the value. It runs once the clone has `git config core.hooksPath .githooks`. `preen doctor` (plumage) runs the same hook on the working copy, and warns when that config is missing or plumage's row stops linking here. A new value goes into the box's `secrets.yml` — edited there, never in git — and the YAML references it with `!secret`.
+This repo is public, so no file may name the box's ports or keys. `.githooks/pre-commit` refuses a commit when any staged file names a host with a port (loopback, an IP, or whatbox.ca), or a staged YAML file has a `base_url` or `api_key` that is not a `!secret` reference, or a URL outside a comment. It names line numbers only, never the value. It runs once the clone has `git config core.hooksPath .githooks`, and `--no-verify` skips it. `preen doctor` (plumage) runs the same hook on the working copy, and warns when that config is missing or plumage's row stops linking here. A new value goes into the box's `secrets.yml` — edited there, never in git — and the YAML references it with `!secret`.
 
 ## Hardware Constraints (These Drive All Scoring Decisions)
 
