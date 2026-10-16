@@ -146,7 +146,7 @@ radarr:
           - name: UHD-Kino
             score: -10000
 
-      # Boost good HDR stacks
+      # Rewards any DV; only DV with an HDR10 fallback survives the block above
       - trash_ids:
           - b337d6812e06c200ec9a2d3cfa9d20a7 # DV Boost
         assign_scores_to:
@@ -298,10 +298,10 @@ radarr:
           - name: UHD-Kino
             score: 100
 
-      # HEVC encodes that strip HDR/DV info.
-      # Penalized hard here (-1000) because 1080p movies almost always ship with
-      # HDR; a stripped-HDR x265 movie is a red flag. Sonarr uses a softer -100
-      # because TV 1080p often ships non-HDR legitimately — see Sonarr block below.
+      # 720p/1080p HEVC with no HDR or DV tag, re-encode or untouched stream
+      # alike. Under the profile's minimum of 0, -1000 lets such a movie in only
+      # with DD+: a movie nearly always has an x264 or Blu-ray alternative.
+      # Sonarr's -100 is the TV counterpart.
       - trash_ids:
           - 839bea857ed2c0a8e084f3cbdbd65ecb # x265 (no HDR/DV)
         assign_scores_to:
@@ -564,7 +564,7 @@ sonarr:
           - name: UHD
             score: -10000
 
-      # Boost good HDR stacks
+      # Rewards any DV; only DV with an HDR10 fallback survives the block above
       - trash_ids:
           - 7c3a61a9c6cb04f52f1544be6d44a026 # DV Boost
         assign_scores_to:
@@ -619,9 +619,7 @@ sonarr:
           - name: UHD
             score: -4500
 
-      # HD slightly more forgiving than UHD here — TV 1080p has a shorter
-      # rewatch lifetime and smaller disk footprint, so a mis-tagged release
-      # costs less. UHD files are huge and live longer, so we block harder.
+      # Harder in UHD: a bad UHD file costs more disk and is kept longer.
       - trash_ids:
           - e2315f990da2e2cbfc9fa5b7a6fcfe48 # LQ (Release Title)
           - 82d40da2bc6923f41e14394075dd4b03 # No-RlsGroup
@@ -639,8 +637,7 @@ sonarr:
           - name: UHD
             score: -10
 
-      # Same HD/UHD asymmetry rationale as above — UHD pays a bigger price
-      # for a bad release, so we penalize slightly harder there.
+      # Harder in UHD, for the same reason.
       - trash_ids:
           - 32b367365729d530ca1c124a0b180c64 # Bad Dual Groups
           - e1a997ddb54e3ecbfe06341ad323c458 # Obfuscated
@@ -670,9 +667,10 @@ sonarr:
           - name: UHD
             score: 100
 
-      # HEVC encodes that strip HDR/DV info. Softer -100 here (vs Radarr's -1000)
-      # because TV at 1080p often ships non-HDR legitimately, so stripped-HDR x265
-      # isn't automatically a red flag the way it is for a 1080p movie.
+      # 720p/1080p HEVC with no HDR or DV tag. Under the profile's minimum of 0,
+      # -100 lets such an episode in with DD or better: whole seasons are where
+      # x265's smaller files pay off on the seedbox. Radarr's -1000 holds a
+      # movie to DD+.
       - trash_ids:
           - 9b64dff695c2115facf1b6ea59c9bd07 # x265 (no HDR/DV)
         assign_scores_to:

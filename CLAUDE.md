@@ -11,6 +11,7 @@ Recyclarr configuration for a Direct Play-only Plex setup on a Whatbox seedbox. 
 - `recyclarr.yml` — the live config, versioned here. It names no port and no key: `base_url` and `api_key` are `!secret radarr_url` / `!secret radarr_api_key` and the Sonarr pair, resolved on the box from `~/.config/recyclarr/secrets.yml`, which exists only there. plumage deploys it through a link — `~/Development/plumage/hosts/whatbox/files/recyclarr/recyclarr.yml` → `../../../../../recyclarr/recyclarr.yml` — so a plumage clone needs this repo cloned beside it.
 - `README.md` — the public design write-up.
 - `.githooks/pre-commit` — the publishing guard (below).
+- `tests/` — the scoring battery: `releases.tsv` holds release titles and what each profile must do with them; `scores` checks them on the box.
 
 The file carries a `yaml-language-server` schema header, so schema-aware editors validate it on save.
 
@@ -22,6 +23,7 @@ Recyclarr is not installed on this machine, and `sync` reaches Radarr and Sonarr
 ~/Development/plumage/hosts/whatbox/bin/whatbox-apply   # deploys the edited file, re-checks
 ssh -tt whatbox '~/bin/recyclarr sync --preview'        # the parse and the diff, against today's guide
 ssh whatbox '~/bin/recyclarr-sync; tail -n 20 ~/.local/state/recyclarr/sync.log'   # the sync and its log, or wait for cron: Monday 04:00 UTC
+tests/scores                                            # after the sync: release titles scored by the *arrs' own matcher
 ```
 
 - **Never `scp` straight onto the box**: `preen doctor` reports the drift, and `whatbox-apply` puts the governed copy back.
@@ -30,7 +32,9 @@ ssh whatbox '~/bin/recyclarr-sync; tail -n 20 ~/.local/state/recyclarr/sync.log'
 - **A box-side edit is never pulled back**: `whatbox-pull` reports this row as `LINKED` and writes nothing. Carry the change here by hand.
 - **The binary** is `~/bin/recyclarr`, pinned by a row in plumage `hosts/whatbox/promises.tsv`; upgrading it is plumage `docs/maintenance.md` § "Bump a Whatbox binary".
 
-No other commands exist. Beyond the publishing guard there are no tests, no linting, no build steps, and no local validation — the preview on the box is the validator.
+- **The battery tests what Radarr and Sonarr hold**, not the YAML. Each title goes through the service's parse endpoint, and the score is summed from that profile's live format scores, since the endpoint's own score follows whatever library entry the title matches. Every profile's minimum is 0, so `block` means a total below 0.
+
+No other commands exist. There is no linting, build step or local validation: the preview on the box validates the YAML, and the battery validates the scoring.
 
 ## Publishing safety
 
@@ -87,4 +91,5 @@ HDR hierarchy (UHD profiles only): generic HDR (+50) stacks with DV Boost (+1000
 
 - Radarr and Sonarr use **different `trash_ids`** for the same format name. Never copy a trash_id between the radarr and sonarr sections.
 - Every `trash_id` entry — CF or CF group — has an inline comment with its exact guide name (e.g., `# DTS-HD MA`). Keep comments verbatim-identical to the TRaSH guide `name` field so they can be verified mechanically against the guide JSON (`docs/json/{radarr,sonarr}/{cf,cf-groups}/*.json` in the TRaSH-Guides repo).
+- A scoring change brings a row in `tests/releases.tsv` that would fail without it, shown failing before the sync and passing after.
 - Scores assigned to profiles within the same `assign_scores_to` block typically share the same value across profiles unless there's a specific reason to differ (e.g., LQ is `-2500` for HD but `-4500` for UHD — UHD junk costs more disk and lives longer, so it's penalized harder).

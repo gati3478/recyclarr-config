@@ -1,0 +1,88 @@
+"""Scores release titles with Radarr's and Sonarr's own matcher against their
+live quality profiles, and checks each row of releases.tsv. Runs on the box,
+sent there by tests/scores. Reads the API URLs and keys from recyclarr's
+secrets.yml and prints neither.
+
+The parse endpoint's own customFormatScore follows whatever library entry the
+title happens to match, so the score here is computed per profile: the sum of
+that profile's scores for the formats the matcher found.
+"""
+import json
+import os
+import re
+import sys
+import urllib.parse
+import urllib.request
+
+SECRETS = os.path.expanduser("~/.config/recyclarr/secrets.yml")
+LADDER = "ladder:"
+
+
+def read_secrets():
+    found = {}
+    with open(SECRETS) as f:
+        for line in f:
+            m = re.match(r"\s*(\w+)\s*:\s*(\S+)", line)
+            if m:
+                found[m.group(1)] = m.group(2).strip("\"'")
+    return found
+
+
+class Arr:
+    def __init__(self, url, key):
+        self.url = url.rstrip("/")
+        self.key = key
+        self.profiles = {p["name"]: p for p in self.get("/api/v3/qualityprofile")}
+        self.parsed = {}
+
+    def get(self, path):
+        req = urllib.request.Request(self.url + path, headers={"X-Api-Key": self.key})
+        with urllib.request.urlopen(req, timeout=30) as r:
+            return json.load(r)
+
+    def score(self, profile, title):
+        if title not in self.parsed:
+            self.parsed[title] = self.get("/api/v3/parse?title=" + urllib.parse.quote(title)).get("customFormats", [])
+        matched = self.parsed[title]
+        p = self.profiles[profile]
+        by_id = {item["format"]: item["score"] for item in p["formatItems"]}
+        total = sum(by_id.get(cf["id"], 0) for cf in matched)
+        return total, [cf["name"] for cf in matched], p.get("minFormatScore", 0)
+
+
+def main(tsv):
+    secrets = read_secrets()
+    arrs = {}
+    ladders = {}   # (ladder, service, profile) -> the previous row's (line, score)
+    passed = failed = 0
+    for n, line in enumerate(tsv.splitlines(), 1):
+        if not line.strip() or line.startswith("#"):
+            continue
+        kind, service, profile, title = line.split("\t")
+        if service not in arrs:
+            arrs[service] = Arr(secrets[service + "_url"], secrets[service + "_api_key"])
+        arr = arrs[service]
+        if profile not in arr.profiles:
+            print(f"FAIL  line {n}: {service} has no profile {profile!r}")
+            failed += 1
+            continue
+        score, names, floor = arr.score(profile, title)
+        why = ""
+        if kind == "block":
+            ok = score < floor
+        elif kind == "allow":
+            ok = score >= floor
+        elif kind.startswith(LADDER):
+            prev = ladders.get((kind, service, profile))
+            ok = prev is None or score < prev[1]
+            if prev is not None and not ok:
+                why = f"  (must score below line {prev[0]}: {prev[1]})"
+            ladders[(kind, service, profile)] = (n, score)
+        else:
+            ok = False
+            why = f"  (unknown kind {kind!r})"
+        print(f"{'PASS' if ok else 'FAIL'}  {service:<6} {profile:<8} {kind:<15} {score:>6}  {title}  [{', '.join(names)}]{why}")
+        passed += ok
+        failed += not ok
+    print(f"== {passed} passed, {failed} failed ==")
+    sys.exit(1 if failed else 0)

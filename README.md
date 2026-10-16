@@ -66,6 +66,8 @@ recyclarr sync --preview
 recyclarr sync
 ```
 
+`tests/releases.tsv` pins the blocks and the audio, HDR, release-group, IMAX, cut, repack and x265 rules with release titles and what each profile must do with them, scored by Radarr's and Sonarr's own matcher (`tests/scores`, which assumes this setup's box).
+
 ## Why These Choices?
 
 The scoring is opinionated toward a Direct Play workflow where file size matters but quality can't be sacrificed. One profile per resolution pursues the best release that still fits the size envelope (~6–16 GB at 1080p, ~20–35 GB at 2160p) — no 60 GB remuxes, no garbage compressions. The envelope is what the blocks and tiers yield, not a cap: the quality definition follows the guide's movie/series set, which sets no maximum. Everything respects the hard constraint: if Plex can't Direct Play it, it won't play at all.
