@@ -5,7 +5,8 @@ secrets.yml and prints neither.
 
 The parse endpoint's own customFormatScore follows whatever library entry the
 title happens to match, so the score here is computed per profile: the sum of
-that profile's scores for the formats the matcher found.
+that profile's scores for the formats the matcher found. A profile rejects a
+title scoring below its minimum, or in a quality it leaves off.
 """
 import json
 import os
@@ -28,11 +29,21 @@ def read_secrets():
     return found
 
 
+def allowed_qualities(profile):
+    """A group's members follow the group's switch."""
+    names = set()
+    for item in profile["items"]:
+        if item["allowed"]:
+            names.update(m["quality"]["name"] for m in item.get("items") or [item])
+    return names
+
+
 class Arr:
     def __init__(self, url, key):
         self.url = url.rstrip("/")
         self.key = key
         self.profiles = {p["name"]: p for p in self.get("/api/v3/qualityprofile")}
+        self.allowed = {name: allowed_qualities(p) for name, p in self.profiles.items()}
         self.parsed = {}
 
     def get(self, path):
@@ -40,14 +51,24 @@ class Arr:
         with urllib.request.urlopen(req, timeout=30) as r:
             return json.load(r)
 
-    def score(self, profile, title):
+    def parse(self, title):
         if title not in self.parsed:
-            self.parsed[title] = self.get("/api/v3/parse?title=" + urllib.parse.quote(title)).get("customFormats", [])
-        matched = self.parsed[title]
+            self.parsed[title] = self.get("/api/v3/parse?title=" + urllib.parse.quote(title))
+        return self.parsed[title]
+
+    def score(self, profile, title):
+        matched = self.parse(title).get("customFormats", [])
         p = self.profiles[profile]
         by_id = {item["format"]: item["score"] for item in p["formatItems"]}
         total = sum(by_id.get(cf["id"], 0) for cf in matched)
         return total, [cf["name"] for cf in matched], p.get("minFormatScore", 0)
+
+    def quality(self, profile, title):
+        """The parsed quality's name, and whether the profile allows it."""
+        parsed = self.parse(title)
+        info = parsed.get("parsedMovieInfo") or parsed.get("parsedEpisodeInfo") or {}
+        name = info.get("quality", {}).get("quality", {}).get("name")
+        return name, name in self.allowed[profile]
 
 
 def main(tsv):
@@ -67,11 +88,12 @@ def main(tsv):
             failed += 1
             continue
         score, names, floor = arr.score(profile, title)
+        quality, allowed = arr.quality(profile, title)
         why = ""
         if kind == "block":
-            ok = score < floor
+            ok = score < floor or not allowed
         elif kind == "allow":
-            ok = score >= floor
+            ok = score >= floor and allowed
         elif kind.startswith(LADDER):
             prev = ladders.get((kind, service, profile))
             ok = prev is None or score < prev[1]
@@ -81,7 +103,8 @@ def main(tsv):
         else:
             ok = False
             why = f"  (unknown kind {kind!r})"
-        print(f"{'PASS' if ok else 'FAIL'}  {service:<6} {profile:<8} {kind:<15} {score:>6}  {title}  [{', '.join(names)}]{why}")
+        off = "" if allowed else " (off)"
+        print(f"{'PASS' if ok else 'FAIL'}  {service:<6} {profile:<8} {kind:<15} {score:>6}  {title}  {quality}{off}  [{', '.join(names)}]{why}")
         passed += ok
         failed += not ok
     print(f"== {passed} passed, {failed} failed ==")

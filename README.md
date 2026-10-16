@@ -15,8 +15,8 @@ One profile per resolution on each side — two Radarr profiles for movies, two 
 
 ### Radarr Profiles
 
-- **HD-Kino** (~6–16 GB): 1080p cap, premium WEB/BD groups, rich audio
-- **UHD-Kino** (~20–35 GB): up to 2160p, HDR/DV, UHD BD/WEB top tiers, IMAX ok
+- **HD-Kino**: 1080p cap, premium WEB/BD groups, rich audio
+- **UHD-Kino**: up to 2160p, HDR/DV, UHD BD/WEB top tiers, IMAX ok
 
 ### Sonarr Profiles
 
@@ -70,4 +70,4 @@ recyclarr sync
 
 ## Why These Choices?
 
-The scoring is opinionated toward a Direct Play workflow where file size matters but quality can't be sacrificed. One profile per resolution pursues the best release that still fits the size envelope (~6–16 GB at 1080p, ~20–35 GB at 2160p) — no 60 GB remuxes, no garbage compressions. The envelope is what the blocks and tiers yield, not a cap: the quality definition follows the guide's movie/series set, which sets no maximum. Everything respects the hard constraint: if Plex can't Direct Play it, it won't play at all.
+The scoring is opinionated toward a Direct Play workflow where file size matters but quality can't be sacrificed. One profile per resolution pursues the best release short of a remux — no 60 GB remuxes, no garbage compressions. Size is what the blocks and tiers yield, not a cap: the quality definition follows the guide's movie/series set, which sets no maximum. Everything respects the hard constraint: if Plex can't Direct Play it, it won't play at all.

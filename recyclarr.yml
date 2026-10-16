@@ -11,7 +11,7 @@ radarr:
 
     quality_profiles:
       # ============================================================
-      # HD-Kino — 1080p cap, premium groups & audio (~6–16 GB)
+      # HD-Kino — 1080p cap, premium groups & audio
       # ============================================================
       - name: HD-Kino
         reset_unmatched_scores:
@@ -36,7 +36,7 @@ radarr:
             qualities: [WEBDL-480p, WEBRip-480p]
 
       # ============================================================
-      # UHD-Kino — up to 2160p, HDR/DV capable (~20–35 GB, IMAX ok)
+      # UHD-Kino — up to 2160p, HDR/DV capable, IMAX ok
       # ============================================================
       - name: UHD-Kino
         reset_unmatched_scores:
@@ -232,18 +232,8 @@ radarr:
             score: -50
 
       # ============================================================
-      # UNIVERSAL BLOCKS (applied to ALL profiles)
+      # RELEASE PENALTIES (all profiles)
       # ============================================================
-      - trash_ids:
-          - 3a3ff47579026e76d6504ebea39390de # Remux Tier 01
-          - 9f98181fe5a3fbeb0cc29340da2a468a # Remux Tier 02
-          - 8baaf0b3142bf4d94c42a724f034e27a # Remux Tier 03
-        assign_scores_to:
-          - name: HD-Kino
-            score: -10000
-          - name: UHD-Kino
-            score: -10000
-
       - trash_ids:
           - 90a6f9a284dff5103f6346090e6280c8 # LQ
         assign_scores_to:
@@ -600,17 +590,8 @@ sonarr:
             score: 500
 
       # ============================================================
-      # UNIVERSAL BLOCKS (applied to ALL profiles)
+      # RELEASE PENALTIES (all profiles)
       # ============================================================
-      - trash_ids:
-          - 9965a052eb87b0d10313b1cea89eb451 # Remux Tier 01
-          - 8a1d0c3d7497e741736761a1da866a2e # Remux Tier 02
-        assign_scores_to:
-          - name: HD
-            score: -10000
-          - name: UHD
-            score: -10000
-
       - trash_ids:
           - 9c11cd3f07101cdba90a2d81cf0e56b4 # LQ
         assign_scores_to:
@@ -619,13 +600,12 @@ sonarr:
           - name: UHD
             score: -4500
 
-      # Harder in UHD: a bad UHD file costs more disk and is kept longer.
       - trash_ids:
           - e2315f990da2e2cbfc9fa5b7a6fcfe48 # LQ (Release Title)
           - 82d40da2bc6923f41e14394075dd4b03 # No-RlsGroup
         assign_scores_to:
           - name: HD
-            score: -800
+            score: -1000
           - name: UHD
             score: -1000
 
@@ -637,7 +617,6 @@ sonarr:
           - name: UHD
             score: -10
 
-      # Harder in UHD, for the same reason.
       - trash_ids:
           - 32b367365729d530ca1c124a0b180c64 # Bad Dual Groups
           - e1a997ddb54e3ecbfe06341ad323c458 # Obfuscated
@@ -646,7 +625,7 @@ sonarr:
           - name: HD
             score: -2500
           - name: UHD
-            score: -3000
+            score: -2500
 
       # Prefer P2P by lightly penalizing Scene
       - trash_ids:

@@ -32,7 +32,7 @@ tests/scores                                            # after the sync: releas
 - **A box-side edit is never pulled back**: `whatbox-pull` reports this row as `LINKED` and writes nothing. Carry the change here by hand.
 - **The binary** is `~/bin/recyclarr`, pinned by a row in plumage `hosts/whatbox/promises.tsv`; upgrading it is plumage `docs/maintenance.md` § "Bump a Whatbox binary".
 
-- **The battery tests what Radarr and Sonarr hold**, not the YAML. Each title goes through the service's parse endpoint, and the score is summed from that profile's live format scores, since the endpoint's own score follows whatever library entry the title matches. Every profile's minimum is 0, so `block` means a total below 0.
+- **The battery tests what Radarr and Sonarr hold**, not the YAML. Each title goes through the service's parse endpoint, and the score is summed from that profile's live format scores, since the endpoint's own score follows whatever library entry the title matches. `block` means a total below the profile's minimum (0 in every profile) or a quality the profile leaves off.
 
 No other commands exist. There is no linting, build step or local validation: the preview on the box validates the YAML, and the battery validates the scoring.
 
@@ -46,19 +46,19 @@ This repo is public, so no file may name the box's ports or keys. `.githooks/pre
 - **No DTS**: Sonos Beam 2 cannot decode DTS; Plex can't transcode audio either. All DTS formats get `-10000`
 - **No HDR10+**: LG C1 doesn't support it. HDR10+ Boost gets only `+100` (non-zero to act as tiebreaker, not a priority)
 - **Dolby Vision needs HDR10 fallback**: Plex on the C1 plays DV profile 5, which has none, only from MP4; from MKV — nearly every release — it shifts magenta. DV without fallback gets `-10000` in every profile
-- **No Remux/BR-DISK**: Too large for seedbox storage, and Direct Play makes raw disc pointless
+- **No Remux/BR-DISK**: Too large for seedbox storage, and Direct Play makes raw disc pointless. No profile allows a Remux quality, and the Unwanted group blocks BR-DISK
 - **No AV1**: Plex on the C1 always transcodes AV1, which the box cannot do. Blocked at `-10000` through the Unwanted group
 
 ## Profile Architecture
 
 Two profiles per service, one per resolution tier:
 
-| Service | Profile  | Upgrade until | Size envelope |
-| ------- | -------- | ------------- | ------------- |
-| Radarr  | HD-Kino  | Bluray-1080p  | ~6–16 GB      |
-| Radarr  | UHD-Kino | Bluray-2160p  | ~20–35 GB     |
-| Sonarr  | HD       | Bluray-1080p  | per-episode   |
-| Sonarr  | UHD      | Bluray-2160p  | per-episode   |
+| Service | Profile  | Upgrade until |
+| ------- | -------- | ------------- |
+| Radarr  | HD-Kino  | Bluray-1080p  |
+| Radarr  | UHD-Kino | Bluray-2160p  |
+| Sonarr  | HD       | Bluray-1080p  |
+| Sonarr  | UHD      | Bluray-2160p  |
 
 **One guide group, otherwise no TRaSH baseline.** Neither service uses `score_set` or guide-profile `trash_id`s. The one import is the guide's `[Unwanted] Unwanted Formats` group (`custom_format_groups`), adopted whole at its `-10000` so a format the guide adds later arrives blocked rather than at 0. Its members are listed in the guide JSON (`docs/json/{radarr,sonarr}/cf-groups/unwanted-formats.json`), not here. An entry under `custom_formats` overrides a member per profile — LQ, LQ (Release Title), Bad Dual Groups and Extras carry their own scores — and a decline goes under the group's `exclude:` with its reason. Sonarr also `select`s two members the guide leaves off by default, BW and BR-DISK (BTN). Every other score is explicit in the YAML. (Recyclarr's `score_set` only picks which preset score applies to a CF listed _without_ an explicit `score:`; it never pulls formats in by itself.)
 
@@ -68,7 +68,7 @@ All profiles use `reset_unmatched_scores: true`, so any format score this config
 
 ## Scoring Conventions
 
-- `-10000` = hard block (DTS, Remux, DV without fallback, and every Unwanted-group member without an explicit score — BR-DISK, 3D, Upscaled, AV1 and Generated Dynamic HDR among them)
+- `-10000` = hard block (DTS, DV without fallback, and every Unwanted-group member without an explicit score — BR-DISK, 3D, Upscaled, AV1 and Generated Dynamic HDR among them)
 - `-2500` to `-4500` = strong penalty (LQ, Bad Dual Groups, Obfuscated, Extras)
 - `-10` to `-1000` = soft penalty (Retags, Scene, Theatrical Cut, x265 without HDR, LQ (Release Title), No-RlsGroup)
 - `+5` to `+7` = tiebreakers (Repack/Proper, Repack2, Repack3 — grab the corrected release when otherwise equal)
