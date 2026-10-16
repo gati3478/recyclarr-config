@@ -8,13 +8,13 @@ Recyclarr configuration for a Direct Play-only Plex setup on a Whatbox seedbox. 
 
 ## Files
 
-- `recyclarr.yml` — the live config with the real ports, **a symlink** into the dotfiles repo: `../dotfiles/hosts/whatbox/files/recyclarr/recyclarr.yml`, the copy that repo deploys to the box and versions. One file with two names since 09-09-2026: an edit here is the deploy source at once, and `whatbox-pull` writes the box's version back into it. Gitignored here — this repo is public and the ports are the seedbox's — so a fresh clone has no `recyclarr.yml` until the link is made:
+- `recyclarr.yml` — the live config with the real ports, **a symlink** into the plumage repo: `../plumage/hosts/whatbox/files/recyclarr/recyclarr.yml`, the copy that repo deploys to the box and versions. One file with two names since 09-09-2026: an edit here is the deploy source at once, and `whatbox-pull` writes the box's version back into it. Gitignored here — this repo is public and the ports are the seedbox's — so a fresh clone has no `recyclarr.yml` until the link is made:
 
   ```
-  ln -s ../dotfiles/hosts/whatbox/files/recyclarr/recyclarr.yml recyclarr.yml
+  ln -s ../plumage/hosts/whatbox/files/recyclarr/recyclarr.yml recyclarr.yml
   ```
 
-  It carries **no credential**: the two `api_key` lines are `!secret radarr_api_key` / `!secret sonarr_api_key`, resolved on the box from `~/.config/recyclarr/secrets.yml`, which exists only there. ⚠️ Claude Code's Edit tool refuses to write through a symlink — in a session, edit the target path in the dotfiles repo; every other editor follows the link.
+  It carries **no credential**: the two `api_key` lines are `!secret radarr_api_key` / `!secret sonarr_api_key`, resolved on the box from `~/.config/recyclarr/secrets.yml`, which exists only there. ⚠️ Claude Code's Edit tool refuses to write through a symlink — in a session, edit `~/Development/plumage/hosts/whatbox/files/recyclarr/recyclarr.yml`; every other editor follows the link.
 
 - `recyclarr-template.yml` — the shareable version, identical except for two placeholders (`RADARR_PORT`, `SONARR_PORT`)
 
@@ -22,15 +22,15 @@ Both files carry a `yaml-language-server` schema header pointing at recyclarr's 
 
 ## Syncing and deploying
 
-Recyclarr is not installed on this machine, and `sync` reaches Radarr and Sonarr only from the box, so the deploy goes through the dotfiles repo — which governs the box's copy at `~/.config/recyclarr/recyclarr.yml` as a manifest row — and every check runs on the box. **Never `scp` straight onto the box**: `dot-doctor` would report drift, and `whatbox-apply` would put the governed copy back.
+Recyclarr is not installed on this machine, and `sync` reaches Radarr and Sonarr only from the box, so the deploy goes through the plumage repo — which governs the box's copy at `~/.config/recyclarr/recyclarr.yml` as a manifest row — and every check runs on the box. **Never `scp` straight onto the box**: `preen doctor` would report drift, and `whatbox-apply` would put the governed copy back.
 
 ```
-~/Development/dotfiles/hosts/whatbox/bin/whatbox-apply   # deploys the edited file, re-checks
-ssh whatbox '~/bin/recyclarr sync --preview'             # the parse and the diff, against today's guide
-ssh whatbox '~/bin/recyclarr sync'                       # or wait for Monday 04:00 UTC
+~/Development/plumage/hosts/whatbox/bin/whatbox-apply   # deploys the edited file, re-checks
+ssh -tt whatbox '~/bin/recyclarr sync --preview'        # the parse and the diff, against today's guide
+ssh whatbox '~/bin/recyclarr-sync; cat ~/.local/state/recyclarr/last'   # the sync and its verdict, or wait for cron: Monday 04:00 UTC
 ```
 
-`--preview` exits 0 on a config parse error — read its output, not its exit code. The binary is `~/bin/recyclarr` on the box (a pinned `promises.tsv` row), not on the default non-interactive PATH. A Docker form of the preview used to live here; retired 09-09-2026 — it validated parsing only, needed a dummy `secrets.yml` mounted to parse at all, and the `latest` tag it named no longer exists.
+`--preview` exits 0 on a config parse error — read its output, not its exit code. Its diff renders only to a PTY, which `-tt` forces even when stdin is not a terminal, as in a Claude Code session (one `-t` does not); without a PTY it prints log lines and no diff, which reads as clean. Sync through `recyclarr-sync`, cron's wrapper: it skips the run when an *arr is down and writes a one-line verdict to `~/.local/state/recyclarr/last`, which `boxstat` reads. It prints nothing itself, and a bare `recyclarr sync` leaves that verdict showing the last wrapper run. The binary is `~/bin/recyclarr`, pinned by a row in plumage `hosts/whatbox/promises.tsv`; upgrading it is plumage `docs/maintenance.md` § "Bump a Whatbox binary". A Docker form of the preview used to live here; retired 09-09-2026 — it validated parsing only, needed a dummy `secrets.yml` mounted to parse at all, and the `latest` tag it named no longer exists.
 
 No other commands exist. There are no tests, no linting, no build steps.
 
@@ -42,7 +42,7 @@ No other commands exist. There are no tests, no linting, no build steps.
 diff recyclarr.yml recyclarr-template.yml    # exactly 2 differing lines, both base_url
 ```
 
-`dot-doctor` in the dotfiles repo asserts this on every run, and that `recyclarr.yml` here is the link. Edit `recyclarr.yml` first, then regenerate the template from it — never hand-edit the template into drift:
+`preen doctor` (plumage) asserts this on every run, and that `recyclarr.yml` here is the link. Edit `recyclarr.yml` first, then regenerate the template from it — never hand-edit the template into drift:
 
 ```
 awk '/^radarr:/{s="RADARR"} /^sonarr:/{s="SONARR"} {sub(/localhost:[0-9]+/, "localhost:" s "_PORT"); print}' recyclarr.yml > recyclarr-template.yml
@@ -57,6 +57,7 @@ awk '/^radarr:/{s="RADARR"} /^sonarr:/{s="SONARR"} {sub(/localhost:[0-9]+/, "loc
 - **No HDR10+**: LG C1 doesn't support it. HDR10+ Boost gets only `+100` (non-zero to act as tiebreaker, not a priority)
 - **Dolby Vision needs HDR10 fallback**: DV without fallback gets `-10000` (C1 + Plex webOS requirement)
 - **No Remux/BR-DISK**: Too large for seedbox storage, and Direct Play makes raw disc pointless
+- **No AV1**: Direct Play of AV1 on Plex webOS is unverified for the C1, so it gets `-10000` until proven
 
 ## Profile Architecture
 
@@ -77,9 +78,9 @@ All profiles use `reset_unmatched_scores: true`, so any format score not explici
 
 ## Scoring Conventions
 
-- `-10000` = hard block (DTS, Remux, BR-DISK, DV without fallback)
-- `-2500` to `-4500` = strong penalty (LQ, Bad Dual Groups, Obfuscated)
-- `-50` to `-1000` = soft penalty (Scene, Retags, No-RlsGroup, x265 without HDR, Theatrical Cut)
+- `-10000` = hard block (DTS, Remux, BR-DISK, DV without fallback, 3D, Upscaled, AV1, Generated Dynamic HDR)
+- `-2500` to `-4500` = strong penalty (LQ, Bad Dual Groups, Obfuscated, Extras)
+- `-10` to `-1000` = soft penalty (Retags, Scene, Theatrical Cut, x265 without HDR, LQ (Release Title), No-RlsGroup)
 - `+5` to `+7` = tiebreakers (Repack/Proper, Repack2, Repack3 — grab the corrected release when otherwise equal)
 - `+10` to `+100` = light preference (10bit, x265 in UHD, HDR10+, generic HDR +50)
 - `+75` to `+200` = HQ release-group tiers (both services). Scaled down from TRaSH defaults (1600–1800) so audio/HDR scoring still dominates. Bluray tiers sit slightly above WEB tiers (200/150/100 vs 175/125/75), mirroring TRaSH's ordering.
@@ -92,7 +93,7 @@ DD+ ATMOS (1350) > DD+/ATMOS undefined (1250) > TrueHD ATMOS (750) > TrueHD (650
 
 Audio scores are intentionally flat across HD and UHD — the Beam 2 doesn't care what resolution precedes it, so the same hierarchy applies everywhere.
 
-TrueHD is scored positively despite Beam 2 incompatibility because releases with TrueHD always include a DD/AC3 fallback track.
+TrueHD is scored positively despite Beam 2 incompatibility because releases with TrueHD usually include a DD/AC3 fallback track.
 
 HDR hierarchy (UHD profiles only): generic HDR (+50) stacks with DV Boost (+1000) and HDR10+ Boost (+100) to give DV+fallback ~+1050 > HDR10+ ~+150 > HDR10 +50 > SDR 0. DV without HDR10 fallback is blocked hard (-10000) regardless.
 
