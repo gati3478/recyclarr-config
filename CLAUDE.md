@@ -67,19 +67,19 @@ HQ release-group scoring therefore comes from explicitly listed tier CFs in both
 
 All profiles use `reset_unmatched_scores: true`, so any format score this config assigns neither explicitly nor through the group gets zeroed in the *arr instance.
 
-Both instances set `media_management: propers_and_repacks: do_not_prefer`, as recyclarr's schema advises when custom formats handle repacks: the Repack/Proper formats rank a corrected release, not the *arrs' own preference for one.
+Both instances set `media_management: propers_and_repacks: do_not_prefer`, as recyclarr's schema advises when custom formats handle repacks: the Repack/Proper formats rank a corrected release, not the *arrs' own preference for one. Under `prefer_and_upgrade`, `UpgradableSpecification.IsUpgradable` (Sonarr 4.0.20, Radarr 6.4.4) takes a higher revision before it reads the format score; under `do_not_prefer`, a release of equal quality must beat the current one's score by the profile's minimum upgrade score. That minimum stays at its default, 1: above 5, a Repack/Proper's +5 would no longer upgrade.
 
 ## Scoring Conventions
 
-Bands, not lists: the YAML says which format sits where.
+Bands, not lists: the YAML says which format sits where. Bands are categories, so their ranges overlap: +100 is a light preference, a version or a tier, depending on the format.
 
 - `-10000` = hard block: what the hardware cannot play, and every Unwanted-group member the config adopts — the defaults, and Sonarr's BW — but does not score itself
 - `-2500` to `-4500` = strong penalty: releases rarely worth having
 - `-10` to `-1000` = soft penalty: a worse or more doubtful variant, which good audio can still outweigh
 - `+5` to `+7` = tiebreakers: grab the corrected release when otherwise equal
 - `+10` to `+100` = light preference
-- `+75` to `+200` = HQ release-group tiers, scaled down from TRaSH's 1600–1800 so audio and HDR scoring still dominate; Bluray tiers sit slightly above WEB tiers, as in TRaSH's ordering
 - `+50` to `+800` = versions, graded; Theatrical Cut, the one version penalized, is a soft penalty
+- `+75` to `+200` = HQ release-group tiers, scaled down from TRaSH's 1600–1800 so audio and HDR scoring still dominate; Bluray tiers sit slightly above WEB tiers, as in TRaSH's ordering
 - `+450` to `+1350` = strong preference: the audio hierarchy below
 - `+1000` = major feature boost: Dolby Vision
 
