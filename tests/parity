@@ -1,0 +1,143 @@
+#!/usr/bin/env python3
+"""Checks that Radarr and Sonarr score each format they share alike, profile
+for profile: HD-Kino with HD, UHD-Kino with UHD. The services give one format
+different trash_ids, so each id is named by its `# name` comment. Reads the
+YAML only: run it locally, before a deploy.
+"""
+import argparse
+import re
+import sys
+from pathlib import Path
+
+import yaml
+
+DEFAULT = Path(__file__).resolve().parent.parent / "recyclarr.yml"
+PAIRS = {   # service -> profile -> the pair it belongs to
+    "radarr": {"HD-Kino": "HD", "UHD-Kino": "UHD"},
+    "sonarr": {"HD": "HD", "UHD": "UHD"},
+}
+DIFFERS = {   # a name whose scores differ on purpose -> why
+    "x265 (no HDR/DV)": "a movie nearly always has an x264 or Blu-ray alternative; "
+                        "whole seasons are where x265's smaller files pay off",
+}
+# Radarr only, because the guide publishes no Sonarr format of the name.
+RADARR_ONLY = {
+    "4K Remaster", "Criterion Collection", "HD Bluray Tier 03", "IMAX", "IMAX Enhanced",
+    "Open Matte", "Special Edition", "Theatrical Cut",
+    "UHD Bluray Tier 01", "UHD Bluray Tier 02", "UHD Bluray Tier 03",
+}
+# A trash_id as a list item or a trash_id: value, and its trailing comment.
+ID_LINE = re.compile(r"^\s*(?:-\s+)?(?:trash_id:\s*)?([0-9a-f]{32})\s*(?:#\s*(.*?))?\s*$")
+
+
+class SecretLoader(yaml.SafeLoader):
+    pass
+
+
+SecretLoader.add_constructor("!secret", lambda loader, node: loader.construct_scalar(node))
+
+
+def comments(text):
+    """Each trash_id's line number and name comment, None where it has none."""
+    found = {}
+    for n, line in enumerate(text.splitlines(), 1):
+        m = ID_LINE.match(line)
+        if m:
+            found[m[1]] = (n, m[2] or None)
+    return found
+
+
+def read(path):
+    """Per service: every trash_id the file holds, and each custom_formats
+    entry as (its trash_ids, {profile: score})."""
+    text = path.read_text()
+    doc = yaml.load(text, Loader=SecretLoader)
+    ids, entries = {}, {}
+    for service in PAIRS:
+        ids[service], entries[service] = [], []
+        for instance in doc[service].values():
+            for group in (instance.get("custom_format_groups") or {}).get("add") or []:
+                ids[service] += [group["trash_id"], *(group.get("select") or [])]
+            for cf in instance.get("custom_formats") or []:
+                scores = {a["name"]: a.get("score") for a in cf["assign_scores_to"]}
+                ids[service] += cf["trash_ids"]
+                entries[service].append((cf["trash_ids"], scores))
+    return comments(text), ids, entries
+
+
+def check(named, ids, entries):
+    failures = []
+    for service in PAIRS:
+        for trash_id in ids[service]:
+            line, name = named.get(trash_id, ("?", None))
+            if name is None:
+                failures.append(f"{service} trash_id {trash_id} (line {line}) has no # name comment")
+
+    scores = {service: {} for service in PAIRS}   # service -> name -> {pair: score}
+    unpaired = set()
+    for service, pairs in PAIRS.items():
+        for trash_ids, by_profile in entries[service]:
+            for profile, score in by_profile.items():
+                if profile not in pairs:
+                    unpaired.add(f"{service} profile {profile} pairs with no profile in the other service")
+                    continue
+                for trash_id in trash_ids:
+                    name = named.get(trash_id, (None, None))[1]
+                    if name is not None:
+                        scores[service].setdefault(name, {})[pairs[profile]] = score
+    failures += sorted(unpaired)
+
+    radarr, sonarr = scores["radarr"], scores["sonarr"]
+    for name in sorted(radarr.keys() | sonarr.keys()):
+        if name not in sonarr:
+            if name not in RADARR_ONLY:
+                failures.append(f"{name}: scored in radarr only")
+            continue
+        if name not in radarr:
+            failures.append(f"{name}: scored in sonarr only")
+            continue
+        if name in DIFFERS:
+            continue
+        for pair in sorted(radarr[name].keys() | sonarr[name].keys()):
+            if radarr[name].get(pair) != sonarr[name].get(pair):
+                failures.append(f"{name}: {side('radarr', pair, radarr[name])} vs {side('sonarr', pair, sonarr[name])}")
+
+    for name in sorted(RADARR_ONLY):
+        if name not in radarr or name in sonarr:
+            failures.append(f"allowlist: {name} is no longer scored in radarr only")
+    for name in sorted(DIFFERS):
+        if name not in radarr or name not in sonarr or radarr[name] == sonarr[name]:
+            failures.append(f"allowlist: {name} no longer differs between the services")
+    return failures
+
+
+def side(service, pair, by_pair):
+    profile = next(p for p, q in PAIRS[service].items() if q == pair)
+    return f"{service} {profile} {by_pair.get(pair, 'unscored')}"
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        prog="tests/parity",
+        description="Checks that Radarr and Sonarr score shared formats alike, "
+                    "HD-Kino with HD and UHD-Kino with UHD. Local; no box.",
+        epilog="exit 0 parity holds, 1 a check failed (one line each), 2 FILE unreadable",
+    )
+    parser.add_argument("file", nargs="?", type=Path, default=DEFAULT,
+                        help="the config to check (default: recyclarr.yml beside tests/)")
+    path = parser.parse_args().file
+    try:
+        named, ids, entries = read(path)
+    except (OSError, yaml.YAMLError, KeyError, TypeError, AttributeError) as e:
+        print(f"tests/parity: cannot read {path}: {type(e).__name__}: {e}", file=sys.stderr)
+        sys.exit(2)
+
+    failures = check(named, ids, entries)
+    for failure in failures:
+        print(f"FAIL  {failure}")
+    print(f"== {len(failures)} failed ==" if failures else "== parity holds ==")
+    sys.exit(1 if failures else 0)
+
+
+if __name__ == "__main__":
+    main()
