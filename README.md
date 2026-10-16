@@ -42,9 +42,10 @@ One profile per resolution on each side — two Radarr profiles for movies, two 
 
 - TRaSH HQ tier formats (HD/UHD Bluray tiers, WEB tiers) applied in both services, scaled from TRaSH's 1600–1800 defaults down to +75…+200 — group quality breaks ties but never outvotes audio/HDR scoring
 
-**Movie Versions (Radarr)**
+**Versions**
 
 - IMAX / IMAX Enhanced strongly preferred (+800); Hybrid, Open Matte, Criterion, Special Edition, and remasters get graded boosts; Theatrical Cut slightly penalized when a better version exists
+- Sonarr scores the two versions it shares with Radarr, Hybrid and Remaster, the same way
 
 **Universal Blocks & Nudges**
 
@@ -52,7 +53,7 @@ One profile per resolution on each side — two Radarr profiles for movies, two 
 - The guide's other unwanted formats blocked with it: releases tagged as upscales or regrades, black-and-white editions, and in Radarr 3D encodes, sing-along editions and line-dubbed audio
 - Scene releases slightly penalized (prefer P2P quality)
 - Low-quality and obfuscated releases heavily penalized; re-tags nudged down
-- Repack/Proper scored +5…+7 as pure tiebreakers — grab the corrected release when otherwise equal
+- Repack/Proper scored +5…+7 as pure tiebreakers, with the *arrs' own repack preference off — grab the corrected release when otherwise equal
 
 ## Usage
 
@@ -66,7 +67,7 @@ recyclarr sync --preview
 recyclarr sync
 ```
 
-`tests/releases.tsv` pins the blocks and the audio, HDR, release-group, IMAX, cut, repack and x265 rules with release titles and what each profile must do with them, scored by Radarr's and Sonarr's own matcher (`tests/scores`, which assumes this setup's box).
+`tests/releases.tsv` pins the scoring with release titles and what each profile must do with them, scored by Radarr's and Sonarr's own matcher (`tests/scores`, which assumes this setup's box).
 
 ## Why These Choices?
 
