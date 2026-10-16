@@ -20,7 +20,7 @@ BLOCK_SCORE = "block:score"
 BLOCK_QUALITY = "block:quality"
 ALLOW = "allow"
 LADDER = "ladder:"
-UNPARSED = {None, "Unknown"}   # an unreadable title: Sonarr parses no info, Radarr says Unknown
+UNPARSED = {None, "Unknown"}   # an unreadable title: no parsed info, or a quality of Unknown
 
 
 def read_secrets():
@@ -120,4 +120,7 @@ def main(tsv):
         passed += ok
         failed += not ok
     print(f"== {passed} passed, {failed} failed ==")
+    if passed + failed == 0:
+        print("== no rows: nothing was checked ==")
+        sys.exit(1)
     sys.exit(1 if failed else 0)

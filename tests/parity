@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
-"""Checks that Radarr and Sonarr score each format they share alike, profile
-for profile: HD-Kino with HD, UHD-Kino with UHD. The services give one format
-different trash_ids, so each id is named by its `# name` comment. Reads the
-YAML only: run it locally, before a deploy.
+"""Checks that Radarr and Sonarr give each format both list under
+custom_formats the same score, profile for profile: HD-Kino with HD, UHD-Kino
+with UHD. Group adoption (custom_format_groups) is not compared: a member's
+score there comes from the guide, which this does not read. The services give
+one format different trash_ids, so each id is named by its `# name` comment.
+Reads the YAML only: run it locally, before a deploy.
 """
 import argparse
 import re
@@ -57,7 +59,7 @@ def read(path):
         ids[service], entries[service] = [], []
         for instance in doc[service].values():
             for group in (instance.get("custom_format_groups") or {}).get("add") or []:
-                ids[service] += [group["trash_id"], *(group.get("select") or [])]
+                ids[service] += [group["trash_id"], *(group.get("select") or []), *(group.get("exclude") or [])]
             for cf in instance.get("custom_formats") or []:
                 scores = {a["name"]: a.get("score") for a in cf["assign_scores_to"]}
                 ids[service] += cf["trash_ids"]
@@ -119,8 +121,9 @@ def side(service, pair, by_pair):
 def main():
     parser = argparse.ArgumentParser(
         prog="tests/parity",
-        description="Checks that Radarr and Sonarr score shared formats alike, "
-                    "HD-Kino with HD and UHD-Kino with UHD. Local; no box.",
+        description="Checks that Radarr and Sonarr give the formats both list under "
+                    "custom_formats the same scores, HD-Kino with HD and UHD-Kino with UHD; "
+                    "group adoption is not compared. Local; no box.",
         epilog="exit 0 parity holds, 1 a check failed (one line each), 2 FILE unreadable",
     )
     parser.add_argument("file", nargs="?", type=Path, default=DEFAULT,
@@ -128,7 +131,7 @@ def main():
     path = parser.parse_args().file
     try:
         named, ids, entries = read(path)
-    except (OSError, yaml.YAMLError, KeyError, TypeError, AttributeError) as e:
+    except (OSError, UnicodeDecodeError, yaml.YAMLError, KeyError, TypeError, AttributeError) as e:
         print(f"tests/parity: cannot read {path}: {type(e).__name__}: {e}", file=sys.stderr)
         sys.exit(2)
 

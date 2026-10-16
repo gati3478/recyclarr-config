@@ -9,8 +9,8 @@
 #                  strictly lower in the order listed — best first
 # Each block kind checks one reason, so a title blocked both ways takes a row
 # of each. A title whose quality parses to nothing or to Unknown fails, whatever
-# its kind. Titles are realistic shapes, not real releases; each varies one
-# feature.
+# its kind. Titles are realistic shapes, not real releases; most vary one
+# feature from a plain release.
 
 # ── Radarr: what the hardware cannot play ──────────────────────────────────
 block:score	radarr	HD-Kino	Dune.Part.Two.2024.1080p.BluRay.DTS-HD.MA.7.1.x264-GRP

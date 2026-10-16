@@ -11,7 +11,7 @@ Opinionated Recyclarr config for a Direct Play-only Plex setup with specific har
 
 ## Configuration Philosophy
 
-One profile per resolution on each side — two Radarr profiles for movies, two Sonarr profiles for TV. Scores are explicit in the YAML, with one deliberate import: the guide's Unwanted formats group, adopted whole at its `-10000`, so a junk format the guide adds later arrives blocked rather than allowed. Explicit scores override it where this config disagrees, and `reset_unmatched_scores` zeroes everything else.
+One profile per resolution on each side — two Radarr profiles for movies, two Sonarr profiles for TV. Scores are explicit in the YAML, with one deliberate import: the guide's Unwanted formats group, adopted at its `-10000` with every member the guide marks default, so a junk format the guide later adds as a default arrives blocked rather than allowed. Explicit scores override it where this config disagrees, and `reset_unmatched_scores` zeroes everything else.
 
 ### Radarr Profiles
 
@@ -50,7 +50,7 @@ One profile per resolution on each side — two Radarr profiles for movies, two 
 **Universal Blocks & Nudges**
 
 - Remux/BR-DISK blocked (too large; pointless for Direct Play)
-- The guide's other unwanted formats blocked with it: releases tagged as upscales or regrades, black-and-white editions, and in Radarr 3D encodes, sing-along editions and line-dubbed audio
+- The guide's other unwanted formats blocked with it: releases tagged as upscales or regrades, black-and-white editions, and in Radarr 3D encodes, sing-along editions and line-dubbed audio. Sonarr leaves one of them off, BR-DISK (BTN): it mistakes H.264/H.265 Blu-ray encodes for disc images, and the standard BR-DISK already blocks discs
 - Scene releases slightly penalized (prefer P2P quality)
 - Low-quality and obfuscated releases heavily penalized; re-tags nudged down
 - Repack/Proper scored +5…+7 as pure tiebreakers, with the *arrs' own repack preference off — grab the corrected release when otherwise equal
