@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 """Checks that Radarr and Sonarr give each format both list under
 custom_formats the same score, profile for profile: HD-Kino with HD, UHD-Kino
-with UHD, and that a name only one side lists is on the allowlist below, which
-says why. Group adoption (custom_format_groups) is not compared: a member's
-score there comes from the guide, which this does not read. The services give
-one format different trash_ids, so each id is named by its `# name` comment.
-Reads the YAML only: run it locally, before a deploy.
+with UHD. A name one side lists alone, or one scored differently, passes only
+as the allowlist below states it: its service, or both scores, and the reason.
+No service may list a name twice for one profile. Group adoption
+(custom_format_groups) is not compared: a member's score there comes from the
+guide, which this does not read. The services give one format different
+trash_ids, so each id is named by its `# name` comment. Reads the YAML only:
+run it locally, before a deploy.
 """
 import argparse
 import re
@@ -19,16 +21,20 @@ PAIRS = {   # service -> profile -> the pair it belongs to
     "radarr": {"HD-Kino": "HD", "UHD-Kino": "UHD"},
     "sonarr": {"HD": "HD", "UHD": "UHD"},
 }
-DIFFERS = {   # a name whose scores differ on purpose -> why
-    "x265 (no HDR/DV)": "a movie nearly always has an x264 or Blu-ray alternative; "
-                        "whole seasons are where x265's smaller files pay off",
+DIFFERS = {   # a name scored differently on purpose -> (radarr's scores, sonarr's, why)
+    "x265 (no HDR/DV)": (
+        {"HD": -1000}, {"HD": -100},
+        "a movie nearly always has an x264 or Blu-ray alternative; "
+        "whole seasons are where x265's smaller files pay off",
+    ),
 }
-# Radarr only, because the guide publishes no Sonarr format of the name.
-RADARR_ONLY = {
+# A name one service lists alone, because the guide publishes no format of
+# that name for the other: name -> that service.
+ONLY = dict.fromkeys((
     "4K Remaster", "Criterion Collection", "HD Bluray Tier 03", "IMAX", "IMAX Enhanced",
     "Open Matte", "Special Edition", "Theatrical Cut",
     "UHD Bluray Tier 01", "UHD Bluray Tier 02", "UHD Bluray Tier 03",
-}
+), "radarr")
 # A trash_id as a list item or a trash_id: value, and its trailing comment.
 ID_LINE = re.compile(r"^\s*(?:-\s+)?(?:trash_id:\s*)?([0-9a-f]{32})\s*(?:#\s*(.*?))?\s*$")
 
@@ -77,40 +83,46 @@ def check(named, ids, entries):
                 failures.append(f"{service} trash_id {trash_id} (line {line}) has no # name comment")
 
     scores = {service: {} for service in PAIRS}   # service -> name -> {pair: score}
-    unpaired = set()
+    misfits = set()
     for service, pairs in PAIRS.items():
         for trash_ids, by_profile in entries[service]:
             for profile, score in by_profile.items():
                 if profile not in pairs:
-                    unpaired.add(f"{service} profile {profile} pairs with no profile in the other service")
+                    misfits.add(f"{service} profile {profile} pairs with no profile in the other service")
                     continue
                 for trash_id in trash_ids:
                     name = named.get(trash_id, (None, None))[1]
-                    if name is not None:
-                        scores[service].setdefault(name, {})[pairs[profile]] = score
-    failures += sorted(unpaired)
+                    if name is None:
+                        continue
+                    by_pair = scores[service].setdefault(name, {})
+                    if pairs[profile] in by_pair:
+                        misfits.add(f"{service} lists {name} twice for {profile}")
+                    by_pair[pairs[profile]] = score
+    failures += sorted(misfits)
 
-    radarr, sonarr = scores["radarr"], scores["sonarr"]
-    for name in sorted(radarr.keys() | sonarr.keys()):
-        if name not in sonarr:
-            if name not in RADARR_ONLY:
-                failures.append(f"{name}: scored in radarr only")
-            continue
-        if name not in radarr:
-            failures.append(f"{name}: scored in sonarr only")
+    for name in sorted(scores["radarr"].keys() | scores["sonarr"].keys()):
+        sides = [service for service in PAIRS if name in scores[service]]
+        if len(sides) == 1:
+            if ONLY.get(name) != sides[0]:
+                failures.append(f"{name}: scored in {sides[0]} only")
             continue
         if name in DIFFERS:
             continue
-        for pair in sorted(radarr[name].keys() | sonarr[name].keys()):
-            if radarr[name].get(pair) != sonarr[name].get(pair):
-                failures.append(f"{name}: {side('radarr', pair, radarr[name])} vs {side('sonarr', pair, sonarr[name])}")
+        radarr, sonarr = scores["radarr"][name], scores["sonarr"][name]
+        for pair in sorted(radarr.keys() | sonarr.keys()):
+            if radarr.get(pair) != sonarr.get(pair):
+                failures.append(
+                    f"{name}: {side('radarr', pair, radarr)} vs {side('sonarr', pair, sonarr)}")
 
-    for name in sorted(RADARR_ONLY):
-        if name not in radarr or name in sonarr:
-            failures.append(f"allowlist: {name} is no longer scored in radarr only")
-    for name in sorted(DIFFERS):
-        if name not in radarr or name not in sonarr or radarr[name] == sonarr[name]:
-            failures.append(f"allowlist: {name} no longer differs between the services")
+    for name, service in sorted(ONLY.items()):
+        if [s for s in PAIRS if name in scores[s]] != [service]:
+            failures.append(f"allowlist: {name} is no longer scored in {service} only")
+    for name, (radarr, sonarr, _) in sorted(DIFFERS.items()):
+        found = scores["radarr"].get(name), scores["sonarr"].get(name)
+        if found != (radarr, sonarr):
+            failures.append(
+                f"allowlist: {name} scores radarr {found[0]}, sonarr {found[1]}; "
+                f"the allowlist says radarr {radarr}, sonarr {sonarr}")
     return failures
 
 
@@ -123,8 +135,8 @@ def main():
     parser = argparse.ArgumentParser(
         prog="tests/parity",
         description="Checks that Radarr and Sonarr give the formats both list under "
-                    "custom_formats the same scores, HD-Kino with HD and UHD-Kino with UHD, "
-                    "and fails a name only one side lists unless allowlisted; "
+                    "custom_formats the same scores, HD-Kino with HD and UHD-Kino with UHD; "
+                    "a one-sided name or a deliberate difference passes only as allowlisted; "
                     "group adoption is not compared. Local; no box.",
         epilog="exit 0 parity holds, 1 a check failed (one line each), 2 FILE unreadable",
     )

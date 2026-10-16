@@ -11,7 +11,7 @@ Recyclarr configuration for a Direct Play-only Plex setup on a Whatbox seedbox. 
 - `recyclarr.yml` — the live config, versioned here. It names no port and no key: `base_url` and `api_key` are `!secret radarr_url` / `!secret radarr_api_key` and the Sonarr pair, resolved on the box from `~/.config/recyclarr/secrets.yml`, which exists only there. plumage deploys it through a link — `~/Development/plumage/hosts/whatbox/files/recyclarr/recyclarr.yml` → `../../../../../recyclarr/recyclarr.yml` — so a plumage clone needs this repo cloned beside it.
 - `README.md` — the public design write-up.
 - `.githooks/pre-commit` — the publishing guard (below).
-- `tests/` — the scoring battery: `releases.tsv` holds release titles and what each profile must do with them; `scores` checks them on the box. `parity` checks, locally, that Radarr and Sonarr give the formats both list under `custom_formats` the same scores, and fails a name only one side lists unless its allowlist says why; it does not compare group adoption.
+- `tests/` — the scoring battery: `releases.tsv` holds release titles and what each profile must do with them; `scores` checks them on the box. `parity` checks, locally, that the formats both services list under `custom_formats` score alike, profile for profile; a name one side lists alone, or a deliberate difference, passes only as its allowlist states it. It does not compare group adoption.
 
 The file carries a `yaml-language-server` schema header, so schema-aware editors validate it on save.
 
@@ -97,5 +97,5 @@ HDR hierarchy (UHD profiles only): generic HDR (+50) stacks with DV Boost (+1000
 - Radarr and Sonarr use **different `trash_ids`** for the same format name. Never copy a trash_id between the radarr and sonarr sections.
 - Every `trash_id` entry — CF or CF group — has an inline comment with its exact guide name (e.g., `# DTS-HD MA`). Keep comments verbatim-identical to the TRaSH guide `name` field so they can be verified mechanically against the guide JSON (`docs/json/{radarr,sonarr}/{cf,cf-groups}/*.json` in the TRaSH-Guides repo).
 - A scoring change brings a row in `tests/releases.tsv` that would fail without it, shown failing before the sync and passing after.
-- A score change in one service either mirrors to the other or joins `tests/parity`'s allowlist with its reason.
+- A score change in one service either mirrors to the other or joins `tests/parity`'s allowlist with its reason and both services' scores.
 - Scores assigned to profiles within the same `assign_scores_to` block typically share the same value across profiles unless there's a specific reason to differ (e.g., LQ is `-2500` for HD but `-4500` for UHD — UHD junk costs more disk and lives longer, so it's penalized harder).
